@@ -1,7 +1,7 @@
 // test-bench passed x3 [07.08.2026]
 
 // Master Interrupt Controller
-module MIC (
+module ICL (
     input  logic         CLK,
     input  logic         ICTL_R,
     input  logic         ICTL_E,
@@ -50,7 +50,7 @@ module testbench;
     logic         RD_INTERRUPT_CATALOG_FLAG;
     logic         RD_INTERRUPT_CATALOG_STATUS;
 
-    MIC mic (
+    ICL icl (
         .CLK(CLK),
         .ICTL_R(ICTL_R),
         .ICTL_E(ICTL_E),

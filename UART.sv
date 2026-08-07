@@ -11,4 +11,7 @@ module UART (
     output logic       RX_READY   // Flag "data accepted"
 );
 
+    always_ff @(posedge CLK) begin
+        
+    end
 endmodule
