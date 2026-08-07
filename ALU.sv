@@ -35,6 +35,9 @@ module ALU (
             16'h0009: begin {OVERFLOW_FLAG, SUM} = NUM0  << NUM1;          end     // 0x0009 - lshft
             16'h000A: begin {OVERFLOW_FLAG, SUM} = NUM0  >> NUM1;          end     // 0x000A - rshft
             16'h000B: begin {OVERFLOW_FLAG, SUM} = $signed(NUM0) >>> NUM1; end     // 0x000B - asr
+            // 000C - reg DST, REG0
+            // 000D - dclr (resets the DCL all devices bits)                      (DCL)
+            // 000E - dcls DEVICE_LINE | BIT (sets the DCL device line and bit)   (DCL)
             default: begin
                 SUM                      = 64'b0;
                 UNKNOWN_OPCODE_EXCEPTION = 1;
