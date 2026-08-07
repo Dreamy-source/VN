@@ -40,6 +40,4 @@ module ALU (
             end
         endcase
     end
-
-    // test-bench passed (8/8) [07.08.2026]
 endmodule
