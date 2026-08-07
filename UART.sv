@@ -1,0 +1,6 @@
+// UART
+module UART (
+    // ...
+);
+
+endmodule
