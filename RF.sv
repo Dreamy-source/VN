@@ -1,3 +1,4 @@
+// Register File
 module RF (
     input  logic        CLK,
     input  logic        WE,

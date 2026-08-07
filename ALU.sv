@@ -1,3 +1,4 @@
+// Arithmetic Logic Unit
 module ALU (
     input  logic [15:0] OPCODE,
     input  logic [63:0] NUM0,

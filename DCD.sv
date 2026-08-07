@@ -1,3 +1,4 @@
+// Decoder
 module DCD (
     input  logic [63:0] INSTRUCTION,
     output logic [15:0] OPCODE,
