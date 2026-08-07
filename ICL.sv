@@ -1,5 +1,4 @@
 // Interrupt Control Lines
-// TODO: MMIO (Memory-Mapped I/O)
 module ICL (
     input  logic         CLK,
     input  logic         ICTL_R,
