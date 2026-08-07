@@ -13,6 +13,4 @@ module DCD (
         REG1            = INSTRUCTION[37:33];
         IMMEDIATE       = INSTRUCTION[32:0];
     end
-
-    // test-bench passed (5/5) [07.08.2026]
 endmodule

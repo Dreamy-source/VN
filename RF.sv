@@ -19,6 +19,4 @@ module RF (
             rx[WR_ADDR] <= DATA_INPUT;
         end
     end
-
-    // test-bench passed (12/12) [07.08.2026] 
 endmodule

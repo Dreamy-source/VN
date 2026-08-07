@@ -1,3 +1,5 @@
+// test-bench passed 2x [07.08.2026]
+
 module ALU (
     input  logic [15:0] OPCODE,
     input  logic [63:0] NUM0,
@@ -40,8 +42,6 @@ module ALU (
             end
         endcase
     end
-    
-    // test-bench passed 2x (8/8) [07.08.2026]
 endmodule
 
 ///////////////////////////////////////////////////////////////////
