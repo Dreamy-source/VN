@@ -10,8 +10,7 @@ module UART (
     output logic       TX_BUSY,   // Flag "sending"
     output logic       RX_READY   // Flag "data accepted"
 );
-
     always_ff @(posedge CLK) begin
-        
+       // ... 
     end
 endmodule
