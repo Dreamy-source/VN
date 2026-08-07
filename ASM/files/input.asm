@@ -1,9 +1,13 @@
-asm! enumerate 2
-
-reg rx0 = 5
+reg rx2 = 5
 reg rx1 = 3
 
-add rx2 = rx0 | rx1
+add rx14 = rx0  | rx1
+sub rx15 = rx2  | rx3
+mul rx16 = rx4  | rx5
+div rx17 = rx6  | rx7
+and rx18 = rx8  | rx9
+or  rx19 = rx10 | rx11
+xor rx20 = rx12 | rx13
 
 nothing
 ; meow meow

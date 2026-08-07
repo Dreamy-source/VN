@@ -21,3 +21,7 @@ pub fn write_file(file: &str, content: &str) {
     
     writeln!(file, "{}", content).expect("cannot write to file")
 }
+
+pub fn write_bytes(file: &str, data: &[u8]) {
+    std::fs::write(file, data).expect("machine: fatal=write error");
+}
