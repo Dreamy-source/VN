@@ -7,4 +7,12 @@ module ALU (
     output logic        DIV_BY_ZERO_EXCEPTION,
     output logic        UNKNOWN_OPCODE_EXCEPTION
 );
+
+    always_comb begin
+        SUM                      = 64'b0;
+        OVERFLOW_FLAG            = 0;
+        DIV_BY_ZERO_EXCEPTION    = 0;
+        UNKNOWN_OPCODE_EXCEPTION = 0;
+    end
+
 endmodule
