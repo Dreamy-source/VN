@@ -1,4 +1,4 @@
-// Interrupt Control Lines
+// ICL (Interrupt Control Lines)
 module ICL (
     input  logic         CLK,
     input  logic         ICTL_R,
