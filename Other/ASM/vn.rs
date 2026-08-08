@@ -108,9 +108,15 @@ fn main() {
                 let dst = register_to_hex(parts[1]);
                 let val = value_to_hex(parts[3]);
 
+                if val > 0x1_FFFF_FFFF  /* 8 589 934 591 */ {
+                    eprintln!("  [!] error: immediate value 0x{:X} exceeds 33 bits (max: 0x1_FFFF_FFFF)", val);
+                    eprintln!("  [!] instruction skipped: reg {} = 0x{:X}", parts[1], val);
+                    continue;
+                }
+
                 let instruction: u64 =
                     (op  as u64) << 48 |
-                    (dst as u64) << 32 |
+                    (dst as u64) << 43 |
                     (val as u64);
                 
 
