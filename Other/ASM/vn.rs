@@ -32,6 +32,8 @@ pub fn opcode_to_hex(op: &str) -> u16 {
         "rshft"   => 0x000A,
         "asr"     => 0x000B,
         "reg"     => 0x000C,
+        "dclr"    => 0x000D,
+        "dcls"    => 0x000E,
         _ => panic!("    [?] machine: unknown opcode: '{}'", op),
     }
 }
@@ -69,6 +71,22 @@ fn main() {
         println!("[no] output file not found, using default.");
         "output.bin"
     };
+
+    let accessing_level = args.iter()
+    .find(|a| a.starts_with("-accessing="))
+    .map(|a| {
+        if a == "-accessing=MACHINE" {
+            println!("machine: LEVEL=MACHINE");
+            "MACHINE"
+        } else if a == "-accessing=KERNEL" {
+            println!("machine: LEVEL=KERNEL");
+            "KERNEL"
+        } else {
+            "USER"
+        }
+    })
+    .unwrap_or("USER");
+
     let mut instructions: Vec<u64> = Vec::new();
     println!("\nmachine: enter");
     println!("");
@@ -85,7 +103,7 @@ fn main() {
 
         match opcode {
             "reg" => {
-                println!("  \n[prc] decoding: '{}'", opcode);
+                println!("\n [prc] decoding: '{}'", opcode);
                 let op  = opcode_to_hex(parts[0]);
                 let dst = register_to_hex(parts[1]);
                 let val = value_to_hex(parts[3]);
@@ -97,10 +115,10 @@ fn main() {
                 
 
                 instructions.push(instruction);
-                println!(" [ok] machine: decoded: 0x{:064X}", instruction);
+                println!("   [ok] machine: decoded: 0x{:064X}", instruction);
             }
             "add" | "sub" | "mul" | "div" | "and" | "or" | "xor" | "lshft" | "rshft" | "asr" => {
-                println!("  \n[prc] decoding: '{}'", opcode);
+                println!("\n [prc] decoding: '{}'", opcode);
                 let op   = opcode_to_hex(parts[0]);
                 let dst  = register_to_hex(parts[1]);
                 let reg0 = register_to_hex(parts[3]);
@@ -113,14 +131,57 @@ fn main() {
                     (reg1 as u64) << 33;
                 
                 instructions.push(instruction);
-                println!(" [ok] machine: decoded: 0x{:064X}", instruction);
+                println!("   [ok] machine: decoded: 0x{:064X}", instruction);
             }
             "nothing" => {
                 let op = opcode_to_hex(parts[0]);
 
                 let instruction: u64 = op as u64;
                 instructions.push(instruction);
-                println!(" [ok] machine: decoded: 0x{:064X}", instruction);
+                println!("   [ok] machine: decoded: 0x{:064X}", instruction);
+            }
+            "dclr" => {
+                if accessing_level == "MACHINE" {
+                    println!("\n====== DCL Appeal Start ======");
+                    println!("   [*] machine: appealing to DCL (LEVEL={})", accessing_level);
+                    println!("   [*] machine: appeal: DCL (Device Control Lines)");
+                    println!("   [*] machine: appeal: reset DCL lines");
+                    println!("   [*] machine: waiting for answer...");
+                    let op = opcode_to_hex(parts[0]);
+
+                    let instruction: u64 = op as u64;
+
+                    instructions.push(instruction);
+                    println!("      [ok] machine: appeal: accepted");
+                    println!("      [ok] machine: decoded: {:04X} (dclr)  (0x{:064X})", op, instruction);
+                    println!("\n");
+                } else {
+                    eprintln!(" [*] machine: cannot to decode 'dclr', LEVEL={}", accessing_level);
+                }
+            }
+            "dcls" => {
+                if accessing_level == "MACHINE" {
+                    println!("\n====== DCL Appeal Start ======");
+                    println!("   [*] machine: appealing to DCL (LEVEL={})", accessing_level);
+                    println!("   [*] machine: appeal: DCL (Device Control Lines)");
+                    println!("   [*] machine: appeal: set bit in DCL lines");
+                    println!("   [*] machine: waiting for answer...");
+                    let op = opcode_to_hex(parts[0]);
+                    let line = value_to_hex(parts[1]);
+                    let bit = value_to_hex(parts[3]);
+
+                    let instruction: u64 =
+                        (op as u64)   << 48 |
+                        (line as u64) << 40 |
+                        (bit as u64)  << 39;
+
+                    instructions.push(instruction);
+                    println!("      [ok] machine: appeal: accepted");
+                    println!("      [ok] machine: decoded: {:04X} (dcls) | line={} | bit={}  (0x{:064X})", op, line, bit, instruction);
+                    println!("\n");
+                } else {
+                    eprintln!(" [*] machine: cannot to decode 'dcls', LEVEL={}", accessing_level);
+                }
             }
             _ => {
                 if opcode == "meow" {
