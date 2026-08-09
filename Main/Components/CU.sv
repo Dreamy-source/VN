@@ -62,16 +62,16 @@ module CU (
         .DATA_OUT1(rf_data_out1)
     );
 
-    // откуда = куда
-    assign alu_opcode    = dcd_opcode;    // выбор операции ALU идет от DCD
-    assign alu_num0      = rf_data_out0;  // первое число подключено к RF.DATA_OUT1
-    assign alu_num1      = rf_data_out1;  // второе число подключено к RF.DATA_OUT0
+    // where from = where to
+    assign alu_opcode    = dcd_opcode;    // the ALU operation selection comes from the DCD
+    assign alu_num0      = rf_data_out0;  // the first number is connected to RF.DATA_OUT0.
+    assign alu_num1      = rf_data_out1;  // The second number is connected to RF.DATA_OUT1.
     
     assign rf_clk        = RF_CLK;
     assign rf_we         = RF_WE;
     assign rf_rst        = RF_RST;
-    assign rf_data_input = alu_sum;       // результат ALU подключен к RF.DATA_INPUT
-    assign rf_rd_addr0   = dcd_reg0;      // "читай регистр #0"
-    assign rf_rd_addr1   = dcd_reg1;      // "читай регистр #1"
+    assign rf_data_input = alu_sum;       // result of ALU connected to RF.DATA_INPUT
+    assign rf_rd_addr0   = dcd_reg0;      // read register #0
+    assign rf_rd_addr1   = dcd_reg1;      // read register #1
     assign rf_wr_addr    = dcd_reg_destination;
 endmodule
