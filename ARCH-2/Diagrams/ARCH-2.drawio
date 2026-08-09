@@ -1,0 +1,28 @@
+<mxfile host="65bd71144e">
+    <diagram name="Страница-1" id="FIalKCKmE1UlEqtEEd6e">
+        <mxGraphModel dx="2062" dy="544" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="C4oPYdMY93qhbA6-RZ1A-4" value="&lt;h1&gt;&lt;font&gt;ALU&lt;/font&gt;&lt;/h1&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;fontStyle=0" parent="1" vertex="1">
+                    <mxGeometry x="-1530" y="60" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="NUM0 (I)" style="text;strokeColor=default;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;labelPosition=center;verticalLabelPosition=middle;fontStyle=0" parent="1" vertex="1">
+                    <mxGeometry x="-1610" y="70" width="80" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="NUM1 (I)" style="text;strokeColor=default;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;labelPosition=center;verticalLabelPosition=middle;fontStyle=0" parent="1" vertex="1">
+                    <mxGeometry x="-1610" y="90" width="80" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="SUM&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;(O)" style="text;strokeColor=default;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;labelPosition=center;verticalLabelPosition=middle;fontStyle=0" parent="1" vertex="1">
+                    <mxGeometry x="-1410" y="70" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="OVERFLOW_FLAG (O)" style="text;strokeColor=default;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;labelPosition=center;verticalLabelPosition=middle;fontStyle=0;" parent="1" vertex="1">
+                    <mxGeometry x="-1410" y="90" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="DIV_ZERO_FLAG (O)" style="text;strokeColor=default;fillColor=none;align=center;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;labelPosition=center;verticalLabelPosition=middle;fontStyle=0;" parent="1" vertex="1">
+                    <mxGeometry x="-1410" y="110" width="140" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
