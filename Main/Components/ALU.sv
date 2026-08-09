@@ -20,7 +20,7 @@ module ALU (
             16'h0001: begin {OVERFLOW_FLAG, SUM} = NUM0  +  NUM1;          end     // 0x0001 - add
             16'h0002: begin {OVERFLOW_FLAG, SUM} = NUM0  -  NUM1;          end     // 0x0002 - sub
             16'h0003: begin {OVERFLOW_FLAG, SUM} = NUM0  *  NUM1;          end     // 0x0003 - mul
-            16'h0004: begin                                                        // 0x0004 - div
+            16'h0004: begin                                                     // 0x0004 - div
                 if (NUM1 != 64'b0) begin
                     {OVERFLOW_FLAG, SUM} = NUM0 / NUM1;
                 end else begin
