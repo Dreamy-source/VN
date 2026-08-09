@@ -20,7 +20,7 @@ module ALU (
             16'h0001: begin {OVERFLOW_FLAG, SUM} = NUM0  +  NUM1;          end     // 0x0001 - add
             16'h0002: begin {OVERFLOW_FLAG, SUM} = NUM0  -  NUM1;          end     // 0x0002 - sub
             16'h0003: begin {OVERFLOW_FLAG, SUM} = NUM0  *  NUM1;          end     // 0x0003 - mul
-            16'h0004: begin                                                     // 0x0004 - div
+            16'h0004: begin                                                        // 0x0004 - div
                 if (NUM1 != 64'b0) begin
                     {OVERFLOW_FLAG, SUM} = NUM0 / NUM1;
                 end else begin
@@ -35,6 +35,7 @@ module ALU (
             16'h0009: begin {OVERFLOW_FLAG, SUM} = NUM0  << NUM1;          end     // 0x0009 - lshft
             16'h000A: begin {OVERFLOW_FLAG, SUM} = NUM0  >> NUM1;          end     // 0x000A - rshft
             16'h000B: begin {OVERFLOW_FLAG, SUM} = $signed(NUM0) >>> NUM1; end     // 0x000B - asr
+            16'h000C: begin SUM = NUM0; end
             // 000C - reg DST, REG0
             // 000D - dclr (resets the DCL all devices bits)                      (DCL)
             // 000E - dcls DEVICE_LINE | BIT (sets the DCL device line and bit)   (DCL)

@@ -199,8 +199,8 @@ fn main() {
         }
     }
 
-    fs::write_bytes(output_content, &instructions_to_bin(&instructions));
-    //fs::write_file("files/debug.txt", &instructions_to_txt(&instructions));
+    //fs::write_bytes(output_content, &instructions_to_bin(&instructions));
+    fs::write_file("files/debug.txt", &instructions_to_txt(&instructions));
 
     println!("");
     for (index, line) in content.lines().enumerate() {

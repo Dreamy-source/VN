@@ -89,7 +89,10 @@ module CU (
 
     // where from = where to
     assign alu_opcode         = dcd_opcode;    // the ALU operation selection comes from the DCD
-    assign alu_num0           = rf_data_out0;  // the first number is connected to RF.DATA_OUT0.
+    logic  is_immediate;
+    assign is_immediate       = (dcd_opcode == 16'h000C);
+
+    assign alu_num0           = is_immediate ? {31'b0, dcd_immediate} : rf_data_out0;
     assign alu_num1           = rf_data_out1;  // The second number is connected to RF.DATA_OUT1.
     
     assign rom_addr           = pc_count;
@@ -107,4 +110,47 @@ module CU (
     assign rf_rd_addr0        = dcd_reg0;      // read register #0
     assign rf_rd_addr1        = dcd_reg1;      // read register #1
     assign rf_wr_addr         = dcd_reg_destination;
+endmodule
+
+module GLOBAL_TB;
+    logic CLK;
+    logic RST;
+    logic WE;
+
+    CU cu (
+        .RF_CLK(CLK),
+        .RF_RST(RST),
+        .RF_WE(WE),
+        .PC_CLK(CLK),
+        .PC_RST(RST)
+    );
+
+    always #5 CLK = ~CLK;
+
+    initial begin
+        $display("=== VN CPU GLOBAL TESTBENCH ===");
+        $display("");
+
+        CLK = 0;
+        RST = 1;
+        WE  = 1;
+
+        #10;
+        RST = 0;
+        $display("[RST] CPU started!");
+        $display("");
+
+        repeat (10) @(posedge CLK);
+
+        $display("");
+        $display("=== Simulation finished ===");
+        $finish;
+    end
+
+    always @(posedge CLK) begin
+    $display("[PC=%0d] op=0x%04X rs0=r%0d rs1=r%0d rd=r%0d rf_out0=%0d rf_out1=%0d alu=%0d rf_in=%0d",
+             cu.pc_count, cu.dcd_opcode,
+             cu.dcd_reg0, cu.dcd_reg1, cu.dcd_reg_destination,
+             cu.rf_data_out0, cu.rf_data_out1, cu.alu_sum, cu.rf_data_input);
+    end
 endmodule
