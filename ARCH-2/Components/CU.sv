@@ -39,4 +39,9 @@ module CU;
         .VALUE(DCD_VALUE)
     );
 
+    assign RF_WR_ADDR_REG_0 = DCD_REG_0;   // dst
+    assign RF_RD_ADDR_REG_1 = DCD_REG_1;   // src0
+    assign RF_RD_ADDR_REG_2 = DCD_REG_2;   // src1
+    assign RF_DATA_INPUT    = DCD_VALUE;   // imm
+
 endmodule
