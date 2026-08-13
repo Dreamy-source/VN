@@ -158,7 +158,8 @@ module CU (
     logic [11:0] mmio_addr;
     logic        mmio_setbit;
     logic        mmio_umd;
-    logic        mmio_UART,mmio_TIMER,mmio_GPIO; 
+    logic        mmio_UART,mmio_TIMER;
+    logic        mmio_GPIO [0:63]; 
 
     RF rf (
         .clk(rf_clk),.we(rf_we),.rst(rf_rst),
@@ -253,7 +254,7 @@ module TB;
     end
     
     initial begin
-        $monitor("t=%0t | PC=%0d | op=%h | dst=%0d | src0=%0d | src1=%0d | imm=%0d | alu=%0d | rf_we=%b | pc_next=%b",
+        $monitor("t=%0t | pc=%0d | op=%h | dst=%0d | src0=%0d | src1=%0d | imm=%0d | alu=%0d | rf_we=%b | pc_next=%b",
                  $time,
                  cu_inst.pc_count,
                  cu_inst.dcd_opcode,
