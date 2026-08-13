@@ -58,6 +58,19 @@ module DCD (
     end
 endmodule
 
+module ROM (
+    input  logic [15:0] addr,
+    output logic [63:0] instruction
+);
+    logic [63:0] rom [0:65535];
+
+    initial begin
+        $readmemh("vn.hex", rom);
+    end
+    
+    assign instruction = rom[addr];
+endmodule
+
 module CU;
     logic        rf_clk, rf_we, rf_rst;
     logic [4:0]  rf_rd_addr0, rf_rd_addr1, rf_wr_addr;
