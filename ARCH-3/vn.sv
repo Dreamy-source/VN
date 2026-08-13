@@ -110,7 +110,6 @@ module MMIO (
     output logic        TIMER,
     output logic        GPIO [0:63]
 );
-
     always_comb begin
         umd   = 1'b0;
         UART  = 1'b0;
@@ -127,6 +126,9 @@ module MMIO (
             default: begin umd = 1'b1; end
         endcase
     end
+
+    // TODO: assign this bitch with smth trash (so boooring, hell ass)
+    // also add this stupid trash onto asm and decode this
 endmodule
 
 module CU (
@@ -153,6 +155,11 @@ module CU (
     logic        pc_clk,pc_rst,pc_next;
     logic [15:0] pc_count;
 
+    logic [11:0] mmio_addr;
+    logic        mmio_setbit;
+    logic        mmio_umd;
+    logic        mmio_UART,mmio_TIMER,mmio_GPIO; 
+
     RF rf (
         .clk(rf_clk),.we(rf_we),.rst(rf_rst),
         .rd_addr0(rf_rd_addr0),.rd_addr1(rf_rd_addr1),.wr_addr(rf_wr_addr),
@@ -177,6 +184,12 @@ module CU (
     PC pc (
         .clk(pc_clk),.rst(pc_rst),.next(pc_next),
         .count(pc_count)
+    );
+    MMIO mmio (
+        .addr(mmio_addr),
+        .setbit(mmio_setbit),
+        .umd(mmio_umd),
+        .UART(mmio_UART),.TIMER(mmio_TIMER),.GPIO(mmio_GPIO)
     );
 
     assign rf_clk = clk;
@@ -226,7 +239,6 @@ module TB;
         .clk(clk),
         .rst(rst)
     );
-    
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
