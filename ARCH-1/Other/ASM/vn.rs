@@ -12,7 +12,7 @@ use pl::instructions_to_txt;
 
 pub fn register_to_hex(reg: &str) -> u8 {
     let reg_parsed: u8 = reg.trim_start_matches("rx").parse()
-        .expect(&format!("    [?] machine: unknown register: '{}'", reg));
+        .expect(&format!("    machine: unknown register: '{}'", reg));
 
     reg_parsed
 }

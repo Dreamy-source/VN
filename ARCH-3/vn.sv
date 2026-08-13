@@ -34,10 +34,17 @@ module ALU (
         uo  = 1'b0;
 
         case (operation)
-            9'h001: {ov,sum} = num0 + num1;
-            9'h002: {ov,sum} = num0 - num1;
-            9'h003: sum      = num0 * num1;
-            9'h004: begin if (num1 != 64'b0) begin sum = num0 / num1; end else begin sum = 64'b0; dz  = 1'b1; end end
+            9'h001: {ov,sum} = num0 +  num1;          // add
+            9'h002: {ov,sum} = num0 -  num1;          // sub
+            9'h003: sum      = num0 *  num1;          // mul
+            9'h004: begin if (num1 != 64'b0) begin sum = num0 / num1; end else begin sum = 64'b0; dz  = 1'b1; end end  // div
+            9'h005: {ov,sum} = num0 &  num1;          // and
+            9'h006: {ov,sum} = num0 |  num1;          // or
+            9'h007: {ov,sum} = num0 ^  num1;          // xor
+            9'h008: {ov,sum} =~num1;                  // not
+            9'h009: {ov,sum} = num0 << num1;          // lshft
+            9'h00A: {ov,sum} = num0 >> num1;          // rshft
+            9'h00B: {ov,sum} = $signed(num0) >>> num1;// asr
             default: begin sum = 64'b0; uo = 1'b1; end
         endcase
     end
