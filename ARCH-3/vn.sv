@@ -6,7 +6,7 @@ module RF (
     output logic [63:0] reg_rd_addr_data_out0,reg_rd_addr_data_out1
 );
     logic [63:0] rx [0:31];
-    logic [5:0]  crrx;        // control-register
+    logic [11:0] crrx;        // control-register
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -102,26 +102,29 @@ module PC (
 endmodule
 
 module MMIO (
-    input  logic [5:0] addr,
-    input  logic       setbit,
-    output logic       ud,          // unknown_device_exception
+    input  logic [11:0] addr,
+    input  logic        setbit,
+    output logic        umd,          // unknown_mmio_device_exception
 
-    output logic       UART_bit,
-    output logic       TIMER_bit
+    output logic        UART,
+    output logic        TIMER,
+    output logic        GPIO [0:63]
 );
+
     always_comb begin
-        ud        = 1'b0;
-        UART_bit  = 1'b0;
-        TIMER_bit = 1'b0;
+        umd   = 1'b0;
+        UART  = 1'b0;
+        TIMER = 1'b0;
+
+        for (int i = 0; i < 64; i++) begin
+            GPIO[i] = 1'b0;
+        end
 
         case (addr)
-            6'h01: begin UART_bit  = setbit; end   // 0x01 - UART
-            6'h02: begin TIMER_bit = setbit; end   // 0x02 - TIMER
-            default: begin
-                ud        = 1'b1;
-                UART_bit  = 1'b0;
-                TIMER_bit = 1'b0;
-            end
+            12'h01: UART            = setbit;   // 0x01 - UART (Universal Asynchronous Receiver-Transmitter)
+            12'h02: TIMER           = setbit;   // 0x02 - TIMER
+            12'h03: GPIO[addr[5:0]] = setbit;   // 0x03 - GPIO (General-Purpose Input/Output)
+            default: begin umd = 1'b1; end
         endcase
     end
 endmodule
