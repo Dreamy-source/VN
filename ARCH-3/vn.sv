@@ -6,6 +6,7 @@ module RF (
     output logic [63:0] reg_rd_addr_data_out0,reg_rd_addr_data_out1
 );
     logic [63:0] rx [0:31];
+    logic [11:0] crrw;
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -98,6 +99,12 @@ module PC (
             count <= count + 1;
         end
     end
+endmodule
+
+module MMIO (
+    // ...
+);
+
 endmodule
 
 module CU (
