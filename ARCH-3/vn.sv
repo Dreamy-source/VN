@@ -6,7 +6,7 @@ module RF (
     output logic [63:0] reg_rd_addr_data_out0,reg_rd_addr_data_out1
 );
     logic [63:0] rx [0:31];
-    logic [11:0] crrw;
+    logic [5:0]  crrx;        // control-register
 
     always_ff @(posedge clk) begin
         if (rst) begin
@@ -102,9 +102,28 @@ module PC (
 endmodule
 
 module MMIO (
-    // ...
-);
+    input  logic [5:0] addr,
+    input  logic       setbit,
+    output logic       ud,          // unknown_device_exception
 
+    output logic       UART_bit,
+    output logic       TIMER_bit
+);
+    always_comb begin
+        ud        = 1'b0;
+        UART_bit  = 1'b0;
+        TIMER_bit = 1'b0;
+
+        case (addr)
+            6'h01: begin UART_bit  = setbit; end   // 0x01 - UART
+            6'h02: begin TIMER_bit = setbit; end   // 0x02 - TIMER
+            default: begin
+                ud        = 1'b1;
+                UART_bit  = 1'b0;
+                TIMER_bit = 1'b0;
+            end
+        endcase
+    end
 endmodule
 
 module CU (
