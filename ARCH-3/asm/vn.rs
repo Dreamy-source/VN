@@ -12,18 +12,19 @@ use pl::instructions_to_txt;
 
 pub fn opcode_to_hex(op: &str) -> u32 {
     match (op) {
-        "add"   => 0x001,
-        "sub"   => 0x002,
-        "mul"   => 0x003,
-        "div"   => 0x004,
-        "and"   => 0x005,
-        "or"    => 0x006,
-        "xor"   => 0x007,
-        "not"   => 0x008,
-        "lshft" => 0x009,
-        "rshft" => 0x00A,
-        "asr"   => 0x00B,
-        "load"  => 0x00C,
+        "nothing" => 0x000,
+        "add"     => 0x001,
+        "sub"     => 0x002,
+        "mul"     => 0x003,
+        "div"     => 0x004,
+        "and"     => 0x005,
+        "or"      => 0x006,
+        "xor"     => 0x007,
+        "not"     => 0x008,
+        "lshft"   => 0x009,
+        "rshft"   => 0x00A,
+        "asr"     => 0x00B,
+        "load"    => 0x00C,
         _ => {
             eprintln!("error: unknown opcode: {}", op);
             std::process::exit(1);
@@ -98,6 +99,14 @@ fn main() {
                     (dst as u64) << 50 |
                     imm;
                 
+                instructions.push(instruction);
+                println!("decoded: 0x{:016X}", instruction);
+            }
+            "nothing" => {
+                let op = opcode_to_hex(opcode);
+
+                let instruction: u64 = op as u64;
+
                 instructions.push(instruction);
                 println!("decoded: 0x{:016X}", instruction);
             }

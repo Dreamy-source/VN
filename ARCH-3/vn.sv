@@ -34,6 +34,7 @@ module ALU (
         uo  = 1'b0;
 
         case (operation)
+            9'h000: begin end                         // nothing
             9'h001: {ov,sum} = num0 +  num1;          // add
             9'h002: {ov,sum} = num0 -  num1;          // sub
             9'h003: sum      = num0 *  num1;          // mul
@@ -78,7 +79,7 @@ module ROM (
         for (int i = 0; i < 65536; i++) begin
             rom[i] = 64'b0;
         end
-        $readmemh("/home/dreamy/VN/ARCH-3/firmware.hex", rom);
+        $readmemh("/home/dreamy/VN/ARCH-3/firmware/firmware.hex", rom);
     end
     
     assign instruction = rom[addr];
@@ -171,6 +172,7 @@ module CU (
         pc_next = 1'b0;
 
         case (dcd_opcode)
+            9'h000: begin rf_we   = 1'b0; pc_next = 1'b0; end
             9'h001: begin rf_we   = 1'b1; pc_next = 1'b1; end
             9'h002: begin rf_we   = 1'b1; pc_next = 1'b1; end
             9'h003: begin rf_we   = 1'b1; pc_next = 1'b1; end
