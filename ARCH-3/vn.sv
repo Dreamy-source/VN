@@ -71,6 +71,21 @@ module ROM (
     assign instruction = rom[addr];
 endmodule
 
+module PC (
+    input  logic        clk,
+    input  logic        rst,
+    input  logic        next,
+    output logic [15:0] count
+);
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            count <= 16'b0;
+        end else if (next) begin
+            count <= count + 1;
+        end
+    end
+endmodule
+
 module CU;
     logic        rf_clk, rf_we, rf_rst;
     logic [4:0]  rf_rd_addr0, rf_rd_addr1, rf_wr_addr;
