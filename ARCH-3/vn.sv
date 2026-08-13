@@ -102,6 +102,12 @@ module CU;
     logic [4:0]  dcd_reg_dst, dcd_reg_src0, dcd_reg_src1;
     logic [39:0] dcd_immediate;
 
+    logic [15:0] rom_addr;
+    logic [63:0] rom_instruction;
+
+    logic        pc_clk,pc_rst,pc_next;
+    logic [15:0] pc_count;
+
     RF rf (
         .clk(rf_clk),.we(rf_we),.rst(rf_rst),
         .rd_addr0(rf_rd_addr0),.rd_addr1(rf_rd_addr1),.wr_addr(rf_wr_addr),
@@ -119,13 +125,33 @@ module CU;
         .reg_dst(dcd_reg_dst),.reg_src0(dcd_reg_src0),.reg_src1(dcd_reg_src1),
         .immediate(dcd_immediate)
     );
+    ROM rom (
+        .addr(rom_addr),
+        .instruction(rom_instruction)
+    );
+    PC pc (
+        .clk(pc_clk),.rst(pc_rst),.next(pc_next),
+        .count(pc_count)
+    );
 
     // кого = к_кому
-    assign alu_operation =  dcd_opcode;
-    assign alu_num0      =  rf_reg_rd_addr_data_out0;
-    assign alu_num1      =  rf_reg_rd_addr_data_out1;
-    assign rf_wr_addr    =  dcd_reg_dst;
-    assign rf_rd_addr0   =  dcd_reg_src0;
-    assign rf_rd_addr1   =  dcd_reg_src1;
-    assign rf_data_in    =  (dcd_opcode == 9'h00C) ? {24'b0, dcd_immediate} : alu_sum;
+    assign alu_operation   =  dcd_opcode;
+    assign alu_num0        =  rf_reg_rd_addr_data_out0;
+    assign alu_num1        =  rf_reg_rd_addr_data_out1;
+    assign rf_wr_addr      =  dcd_reg_dst;
+    assign rf_rd_addr0     =  dcd_reg_src0;
+    assign rf_rd_addr1     =  dcd_reg_src1;
+    assign rf_data_in      =  (dcd_opcode == 9'h00C) ? {24'b0, dcd_immediate} : alu_sum;
+
+    assign rom_addr        =  pc_count;
+    assign dcd_instruction =  rom_instruction;
 endmodule
+
+module TB;
+    task pc_next();
+        pc_next = 1;
+        #10;
+        pc_next = 0;
+    endtask
+endmodule
+
