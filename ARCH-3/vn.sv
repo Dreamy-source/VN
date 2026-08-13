@@ -196,13 +196,11 @@ module TB;
         .rst(rst)
     );
     
-    // Клок — 100 MHz (период 10)
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
     
-    // Сброс и запуск
     initial begin
         rst = 1;
         #10;
@@ -211,7 +209,6 @@ module TB;
         $finish;
     end
     
-    // Вывод всего интересного
     initial begin
         $monitor("t=%0t | PC=%0d | op=%h | dst=%0d | src0=%0d | src1=%0d | imm=%0d | alu=%0d | rf_we=%b | pc_next=%b",
                  $time,
