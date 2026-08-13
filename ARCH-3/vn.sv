@@ -45,7 +45,10 @@ module ALU (
             9'h009: {ov,sum} = num0 << num1;          // lshft
             9'h00A: {ov,sum} = num0 >> num1;          // rshft
             9'h00B: {ov,sum} = $signed(num0) >>> num1;// asr
-            default: begin sum = 64'b0; uo = 1'b1; end
+            default: begin
+                sum = 64'b0;
+                uo = 1'b1;
+            end
         endcase
     end
 endmodule
@@ -72,7 +75,10 @@ module ROM (
     logic [63:0] rom [0:65535];
 
     initial begin
-        $readmemh("vn.hex", rom);
+        for (int i = 0; i < 65536; i++) begin
+            rom[i] = 64'b0;
+        end
+        $readmemh("/home/dreamy/VN/ARCH-3/firmware.hex", rom);
     end
     
     assign instruction = rom[addr];
@@ -93,7 +99,9 @@ module PC (
     end
 endmodule
 
-module CU;
+module CU (
+    input  logic clk,rst
+);
     logic        rf_clk, rf_we, rf_rst;
     logic [4:0]  rf_rd_addr0, rf_rd_addr1, rf_wr_addr;
     logic [63:0] rf_data_in;
@@ -141,6 +149,11 @@ module CU;
         .count(pc_count)
     );
 
+    assign rf_clk = clk;
+    assign pc_clk = clk;
+    assign rf_rst = rst;
+    assign pc_rst = rst;
+
     // кого = к_кому
     assign alu_operation   =  dcd_opcode;
     assign alu_num0        =  rf_reg_rd_addr_data_out0;
@@ -152,13 +165,64 @@ module CU;
 
     assign rom_addr        =  pc_count;
     assign dcd_instruction =  rom_instruction;
+
+    always_comb begin
+        rf_we   = 1'b0;
+        pc_next = 1'b0;
+
+        case (dcd_opcode)
+            9'h001: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h002: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h003: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h004: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h005: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h006: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h007: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h008: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h009: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h00A: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h00B: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            9'h00C: begin rf_we   = 1'b1; pc_next = 1'b1; end
+            default: begin rf_we  = 1'b0; pc_next = 1'b0; end
+        endcase
+    end
 endmodule
 
 module TB;
-    task pc_next();
-        pc_next = 1;
+    logic clk, rst;
+    
+    CU cu_inst (
+        .clk(clk),
+        .rst(rst)
+    );
+    
+    // Клок — 100 MHz (период 10)
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+    
+    // Сброс и запуск
+    initial begin
+        rst = 1;
         #10;
-        pc_next = 0;
-    endtask
+        rst = 0;
+        #1000;
+        $finish;
+    end
+    
+    // Вывод всего интересного
+    initial begin
+        $monitor("t=%0t | PC=%0d | op=%h | dst=%0d | src0=%0d | src1=%0d | imm=%0d | alu=%0d | rf_we=%b | pc_next=%b",
+                 $time,
+                 cu_inst.pc_count,
+                 cu_inst.dcd_opcode,
+                 cu_inst.dcd_reg_dst,
+                 cu_inst.dcd_reg_src0,
+                 cu_inst.dcd_reg_src1,
+                 cu_inst.dcd_immediate,
+                 cu_inst.alu_sum,
+                 cu_inst.rf_we,
+                 cu_inst.pc_next);
+    end
 endmodule
-
