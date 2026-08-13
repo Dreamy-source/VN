@@ -1,9 +1,9 @@
 module RF (
     input  logic        clk,we,rst,
-    input  logic [4:0]  rd_addr,
+    input  logic [4:0]  rd_addr0,rd_addr1,
     input  logic [4:0]  wr_addr,
     input  logic [63:0] data_in,
-    output logic [63:0] data_out
+    output logic [63:0] reg_rd_addr_data_out0,reg_rd_addr_data_out1
 );
     logic [63:0] rx [0:31];
 
@@ -16,7 +16,9 @@ module RF (
             rx[wr_addr] <= data_in;
         end
     end
-    assign data_out = rx[rd_addr];
+
+    assign reg_rd_addr_data_out0 = rx[rd_addr0];
+    assign reg_rd_addr_data_out1 = rx[rd_addr1];
 endmodule
 
 module ALU (
@@ -26,16 +28,17 @@ module ALU (
     output logic        ov,dz,uo        // overflow_flag, div_by_zero_exception, unknown_opcode_exception
 );
     always_comb begin
-        ov = 1'b0;
-        dz = 1'b0;
-        uo = 1'b0;
+        sum = 64'b0;
+        ov  = 1'b0;
+        dz  = 1'b0;
+        uo  = 1'b0;
 
         case (operation)
             9'h001: {ov,sum} = num0 + num1;
             9'h002: {ov,sum} = num0 - num1;
-            9'h003: {ov,sum} = num0 * num1;
-            9'h004: if (num1 != 64'b0) {ov,sum} = num0 / num1; else dz = 1'b1; 
-            default: sum = 64'b0; uo = 1'b1;
+            9'h003: sum      = num0 * num1;
+            9'h004: begin if (num1 != 64'b0) begin sum = num0 / num1; end else begin sum = 64'b0; dz  = 1'b1; end end
+            default: begin sum = 64'b0; uo = 1'b1; end
         endcase
     end
 endmodule
@@ -56,30 +59,31 @@ module DCD (
 endmodule
 
 module CU;
-    logic        rf_clk,rf_we,rf_rst;
-    logic [4:0]  rf_rd_addr,rd_wr_addr;
-    logic [63:0] rf_data_in,rf_data_out;
+    logic        rf_clk, rf_we, rf_rst;
+    logic [4:0]  rf_rd_addr0, rf_rd_addr1, rf_wr_addr;
+    logic [63:0] rf_data_in;
+    logic [63:0] rf_reg_rd_addr_data_out0, rf_reg_rd_addr_data_out1;
 
     logic [8:0]  alu_operation;
-    logic [63:0] alu_num0,alu_num1;
+    logic [63:0] alu_num0, alu_num1;
     logic [63:0] alu_sum;
-    logic        alu_ov,alu_dz,alu_uo;
+    logic        alu_ov, alu_dz, alu_uo;
 
     logic [63:0] dcd_instruction;
     logic [8:0]  dcd_opcode;
-    logic [4:0]  dcd_reg_dst,dcd_reg_src0,dcd_reg_src1;
+    logic [4:0]  dcd_reg_dst, dcd_reg_src0, dcd_reg_src1;
     logic [39:0] dcd_immediate;
 
     RF rf (
         .clk(rf_clk),.we(rf_we),.rst(rf_rst),
-        .rd_addr(rf_rd_addr),.wr_addr(rf_wr_addr),
-        .data_in(rf_data_in),.data_out(rf_data_out)
+        .rd_addr0(rf_rd_addr0),.rd_addr1(rf_rd_addr1),.wr_addr(rf_wr_addr),
+        .data_in(rf_data_in),.reg_rd_addr_data_out0(rf_reg_rd_addr_data_out0),.reg_rd_addr_data_out1(rf_reg_rd_addr_data_out1)
     );
     ALU alu (
         .operation(alu_operation),
         .num0(alu_num0),.num1(alu_num1),
         .sum(alu_sum),
-        .ov(alu_ov),.dz(alu_dz),.uo(alu_ou)
+        .ov(alu_ov),.dz(alu_dz),.uo(alu_uo)
     );
     DCD dcd (
         .instruction(dcd_instruction),
@@ -87,4 +91,13 @@ module CU;
         .reg_dst(dcd_reg_dst),.reg_src0(dcd_reg_src0),.reg_src1(dcd_reg_src1),
         .immediate(dcd_immediate)
     );
+
+    // кого = к_кому
+    assign alu_operation =  dcd_opcode;
+    assign alu_num0      =  rf_reg_rd_addr_data_out0;
+    assign alu_num1      =  rf_reg_rd_addr_data_out1;
+    assign rf_wr_addr    =  dcd_reg_dst;
+    assign rf_rd_addr0   =  dcd_reg_src0;
+    assign rf_rd_addr1   =  dcd_reg_src1;
+    assign rf_data_in    =  (dcd_opcode == 9'h00C) ? {24'b0, dcd_immediate} : alu_sum;
 endmodule
