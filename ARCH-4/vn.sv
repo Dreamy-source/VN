@@ -14,16 +14,32 @@ interface ALU_if;
     logic        ov,dz,uo;
 
     modport alu (
-        input  operation, num0, num1
-        output sum
+        input  operation, num0, num1,
+        output sum, ov, dz, uo
     );
 endinterface
 
 
+module RF (RF_if.rf intf);
+    logic [63:0] rx [0:31];
+
+    always_ff @(posedge intf.clk) begin
+        if (intf.rst) begin
+            for (int i = 0; i < 32; i++) begin
+                rx[i] <= 64'b0;
+            end
+        end else if (intf.we) begin
+            rx[intf.wr_addr] <= intf.data;
+        end
+    end
+endmodule
+
 module ALU (ALU_if.alu intf);
     always_comb begin
-        sum      = 64'b0;
-        ov,dz,uo = 1'b0
+        intf.sum = 64'b0;
+        intf.ov  = 1'b0;
+        intf.dz  = 1'b0;
+        intf.uo  = 1'b0;
 
         case (intf.operation)
             9'h001: {intf.ov,intf.sum} = intf.num0 + intf.num1;
@@ -40,17 +56,3 @@ module ALU (ALU_if.alu intf);
         endcase
     end
 endmodule
-
-module RF (RF_if.rf intf);
-    logic [63:0] rx [0:31];
-
-    always_ff @(posedge intf.clk) begin
-        if (intf.rst) begin
-            for (int i = 0; i < 32; i++) begin
-                rx[i] <= 64'b0;
-            end
-        end else if (intf.we) begin
-            rx[intf.wr_addr] <= intf.data;
-        end
-    end
-endmodul
