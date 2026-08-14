@@ -126,9 +126,6 @@ module MMIO (
             default: begin umd = 1'b1; end
         endcase
     end
-
-    // TODO: assign this bitch with smth trash (so boooring, hell ass)
-    // also add this stupid trash onto asm and decode this
 endmodule
 
 module CU (
@@ -209,6 +206,11 @@ module CU (
 
     assign rom_addr        =  pc_count;
     assign dcd_instruction =  rom_instruction;
+    
+    // ahh, stopped heres (connect crrx to mmio)
+    //assign RF.crrx         =
+    
+    // TODO: BSU (Bit Status Unit)  
 
     always_comb begin
         rf_we   = 1'b0;
