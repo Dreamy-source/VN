@@ -24,34 +24,34 @@ module ALU (
     input  logic [8:0]  operation,
     input  logic [63:0] num0,num1,
     output logic [63:0] sum,
-    output logic        ov,dz,uo        // overflow_flag, div_by_zero_exception, unknown_opcode_exception
+    output logic        OF,DZ,UF        // OFerflow_flag, div_by_zero_exception, unknown_opcode_exception
 );
     always_comb begin
         sum        = 64'b0;
-        {ov,dz,uo} = 3'b0;
+        {OF,DZ,UF} = 3'b0;
 
         case (operation)
-            9'h001: {ov,sum} = num0 + num1;             // ADD
-            9'h002: {ov,sum} = num0 - num1;             // SUB
-            9'h003: {ov,sum} = num0 * num1;             // MUL
+            9'h001: {OF,sum} = num0 + num1;             // ADD
+            9'h002: {OF,sum} = num0 - num1;             // SUB
+            9'h003: {OF,sum} = num0 * num1;             // MUL
             9'h004: begin                               // DIV
                 if (num1 != 64'b0) begin
-                    {ov,sum} = num0 / num1;
+                    {OF,sum} = num0 / num1;
                 end else begin
                     sum = 64'b0;
                     dz  = 1'b1;
                 end
             end
-            9'h005: {ov,sum} = num0 & num1;             // AND
-            9'h006: {ov,sum} = num0 | num1;             // OR
-            9'h007: {ov,sum} = num0 ^ num1;             // XOR
-            9'h008: {ov,sum} = ~num0;                   // NOT
-            9'h009: {ov,sum} = num0 >> num1;            // RSH
-            9'h00A: {ov,sum} = num0 << num1;            // LSH
-            9'h00B: {ov,sum} = $signed(num0) >>> num1;  // ASHR (All Shift Right)
+            9'h005: {OF,sum} = num0 & num1;             // AND
+            9'h006: {OF,sum} = num0 | num1;             // OR
+            9'h007: {OF,sum} = num0 ^ num1;             // XOR
+            9'h008: {OF,sum} = ~num0;                   // NOT
+            9'h009: {OF,sum} = num0 >> num1;            // RSH
+            9'h00A: {OF,sum} = num0 << num1;            // LSH
+            9'h00B: {OF,sum} = $signed(num0) >>> num1;  // ASHR (All Shift Right)
             default: begin
                 sum = 64'b0;
-                uo  = 1'b1;
+                UF  = 1'b1;
             end
             // 00C - Taken (load)
             // 1FF - Taken (mmload)
@@ -106,6 +106,49 @@ module PC (
     end
 endmodule
 
+module RDT (                      // Root Device Tree
+    input  logic [7:0]  rp,       // Root Pointer
+    input  logic [7:0]  device,
+    input  logic [63:0] handler_addr,  // PC Address
+
+    // Master Base Block (MBB)
+    output logic [63:0] GPIO_handler,
+
+    // Master Interrupt Block (MIB)
+    output logic [63:0] TIMER_handler,
+    output logic [63:0] AUDIO_handler,
+    output logic [63:0] UART_handler,
+
+    output logic        UF              // Unknown Flag
+);
+    always_comb begin
+        GPIO_handler  = 64'h0;
+        TIMER_handler = 64'h0;
+        AUDIO_handler = 64'h0;
+        UART_handler  = 64'h0;
+
+        UF = 1'b0;
+
+        case (rp)
+            8'h01: begin                              // Master Base Block  (mode: 00, 01)
+                case (device)
+                    8'h01: GPIO_handler = handler_addr;  // MBB.0x01 - GPIO
+                    default: UF = 1'b1;                  // Unknown Device
+                endcase
+            end
+            8'h02: begin                              // Master Interrupt Block (mode: 00, 01)
+                case (device)
+                    8'h01: TIMER_handler = handler_addr;  // MIB.0x01 - TIMER
+                    8'h02: AUDIO_handler = handler_addr;  // MIB.0x02 - AUDIO
+                    8'h03: UART_handler  = handler_addr;  // MIB.0x03 - UART
+                    default: UF = 1'b1;                   // Unknown Device
+                endcase
+            end
+            default: UF = 1'b1;                                // Unknown Root Block
+        endcase
+    end
+endmodule
+
 module CU (
     input  logic clk,rst,we
 );
@@ -118,7 +161,7 @@ module CU (
     logic [8:0]  alu_operation;
     logic [63:0] alu_num0,alu_num1;
     logic [63:0] alu_sum;
-    logic        alu_ov,alu_dz,alu_uo;
+    logic        alu_OF,alu_DZ,alu_UF;
 
     logic [63:0] dcd_instruction;
     logic [8:0]  dcd_opcode;
@@ -143,7 +186,7 @@ module CU (
         .operation(alu_operation),
         .num0(alu_num0),.num1(alu_num1),
         .sum(alu_sum),
-        .ov(alu_ov),.dz(alu_dz),.uo(alu_uo)
+        .OF(alu_OF),.DZ(alu_DZ),.UF(alu_UF)
     );
     DCD dcd (
         .instruction(dcd_instruction),
@@ -189,13 +232,13 @@ module CU (
     logic [1:0] mode_next;
     logic [1:0] mode;      // 2'h0 = machine, 2'h1 = kernel
 
-    logic       mm_insufficcient_privileges_exception;
+    logic       EX;
 
     always_comb begin
         pc_go = 1'b0;
         pc_next = 1'b0;
         mode_next = 2'h0;
-        mm_insufficcient_privileges_exception = 1'b0;
+        EX = 1'b0;
 
         case (dcd_opcode)
             9'h1FF: begin   // MMLOAD
@@ -207,7 +250,7 @@ module CU (
                 end else begin
                     pc_next = 1'b0;
                     pc_go = 1'b0;
-                    mm_insufficcient_privileges_exception = 1'b1;
+                    EX = 1'b1;
                 end
             end
             9'h1FE: begin   // MMENTER
@@ -218,14 +261,14 @@ module CU (
                 end else begin
                     pc_next = 1'b0;
                     pc_go = 1'b0;
-                    mm_insufficcient_privileges_exception = 1'b1;
+                    EX = 1'b1;
                 end
             end
             default: begin
                 pc_next = 1'b1;
                 pc_go = 1'b0;
                 mode_next = mode;
-                mm_insufficcient_privileges_exception = 1'b0;
+                EX = 1'b0;
             end
         endcase
     end
