@@ -112,17 +112,24 @@ module ROM (
 endmodule
 
 module PC (
-    input  logic        clk,next,go,rst,
+    input  logic        clk,next,go,save,rst,
     input  logic [15:0] go_addr,
-    output logic [15:0] count
+    output logic [15:0] count,
+    output logic [15:0] saved_count
 );
     always_ff @(posedge clk) begin
         if (rst) begin
             count <= 16'b0;
-        end else if (go) begin
-            count <= go_addr;
-        end else if (next) begin
-            count <= count + 1;
+            saved_count <= 16'b0;
+        end else begin
+            if (save) begin
+                saved_count <= count + 1;
+            end
+            if (go) begin
+                count <= go_addr;
+            end else if (next) begin
+                count <= count + 1;
+            end
         end
     end
 endmodule
@@ -195,9 +202,10 @@ module CU (
     logic [15:0] rom_addr;
     logic [63:0] rom_instruction;
 
-    logic        pc_clk,pc_next,pc_go,pc_rst;
+    logic        pc_clk,pc_next,pc_go,pc_save,pc_rst;
     logic [15:0] pc_go_addr;
     logic [15:0] pc_count;
+    logic [15:0] pc_saved_count;
 
     logic [7:0]  rdt_rp;
     logic [7:0]  rdt_device;
@@ -232,9 +240,10 @@ module CU (
         .instruction(rom_instruction)
     );
     PC pc (
-        .clk(pc_clk),.next(pc_next),.go(pc_go),.rst(pc_rst),
+        .clk(pc_clk),.next(pc_next),.go(pc_go),.save(pc_save),.rst(pc_rst),
         .go_addr(pc_go_addr),
-        .count(pc_count)
+        .count(pc_count),
+        .saved_count(pc_saved_count)
     );
     RDT rdt (
         .rp(rdt_rp),
@@ -291,10 +300,35 @@ module CU (
     always_comb begin
         pc_go = 1'b0;
         pc_next = 1'b0;
+        pc_save = 1'b0;
         mode_next = 2'h0;
         EX = 1'b0;
 
         case (dcd_opcode)
+            9'h00D: begin   // GOLABL
+                pc_go = 1'b1;
+                pc_go_addr = dcd_imm[15:0];
+                pc_next = 1'b0;
+                mode_next = mode;
+            end
+            9'h00E: begin   // STOP
+                pc_next = 1'b0;
+                pc_go = 1'b0;
+                mode_next = mode;
+            end
+            9'h00F: begin   // CALLSV
+                pc_save = 1'b1;
+                pc_go = 1'b1;
+                pc_go_addr = dcd_imm[15:0];
+                pc_next = 1'b0;
+                mode_next = mode;
+            end
+            9'h010: begin   // RETB
+                pc_go = 1'b1;
+                pc_go_addr = pc_saved_count;
+                pc_next = 1'b0;
+                mode_next = mode;
+            end
             9'h1FF: begin   // MMLOAD
                 if (mode == 2'h0) begin
                     pc_go = 1'b1;
@@ -362,12 +396,12 @@ module CU_Testbench;
         #10 rst = 0;
         we = 1;
 
-        repeat(5) begin
+        repeat(10) begin
             @(posedge clk);
             $display("pc=%0d | instruction=%h | opcode=%h",
                  cu.pc.count, cu.dcd_instruction, cu.dcd_opcode);
         end
-        #90;
+        #10;
     
         $display("RF[0] = %h", cu.rf.rx[0]);
         $display("RF[1] = %h", cu.rf.rx[1]);
