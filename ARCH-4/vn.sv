@@ -24,6 +24,23 @@ module RF (
     assign data_out1 = rx[rd_addr1];
 endmodule
 
+module CRF (            // Control-Register File
+    input  logic        clk,rst,we,
+    input  logic [63:0] data,
+    output logic [63:0] data_out
+);
+    logic [63:0] cr;
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            cr <= 64'h0000;
+        end else if (we) begin
+            cr <= data;
+        end
+    end
+    assign data_out = cr;
+endmodule
+
 module ALU (
     input  logic [8:0]  operation,
     input  logic [63:0] num0,num1,
@@ -162,6 +179,9 @@ module CU (
     logic [63:0] rf_data;
     logic [63:0] rf_data_out0,rf_data_out1;
 
+    logic [63:0] crf_data;
+    logic [63:0] crf_data_out;
+
     logic [8:0]  alu_operation;
     logic [63:0] alu_num0,alu_num1;
     logic [63:0] alu_sum;
@@ -226,6 +246,13 @@ module CU (
         .UART_handler(rdt_UART_handler),
         .UF(rdt_UF)
     );
+    CRF crf (
+        .clk(clk),
+        .rst(rst),
+        .we(we),
+        .data(crf_data),
+        .data_out(crf_data_out)
+    );
 
     // clk
     assign pc_clk = clk;
@@ -251,6 +278,10 @@ module CU (
     
     assign dcd_instruction = rom_instruction;
     assign rom_addr        = pc_count;
+
+    assign rdt_handler_addr = crf_data_out[63:16];
+    assign rdt_device       = crf_data_out[15:8];
+    assign rdt_rp           = crf_data_out[7:0];
 
     logic [1:0] mode_next;
     logic [1:0] mode;      // 2'h0 = machine, 2'h1 = kernel
