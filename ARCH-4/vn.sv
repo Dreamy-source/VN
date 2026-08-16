@@ -1,3 +1,7 @@
+// FUCK CISC and x86
+// FUCK CISC and x86
+// FUCK CISC and x86
+
 module RF (
     input  logic        clk,rst,we,
     input  logic [4:0]  wr_addr,            // for dst
@@ -39,7 +43,7 @@ module ALU (
                     {OF,sum} = num0 / num1;
                 end else begin
                     sum = 64'b0;
-                    dz  = 1'b1;
+                    DZ  = 1'b1;
                 end
             end
             9'h005: {OF,sum} = num0 & num1;             // AND
@@ -132,8 +136,8 @@ module RDT (                      // Root Device Tree
         case (rp)
             8'h01: begin                              // Master Base Block  (mode: 00, 01)
                 case (device)
-                    8'h01: GPIO_handler = handler_addr;  // MBB.0x01 - GPIO
-                    default: UF = 1'b1;                  // Unknown Device
+                    8'h01: GPIO_handler = handler_addr;   // MBB.0x01 - GPIO
+                    default: UF = 1'b1;                   // Unknown Device
                 endcase
             end
             8'h02: begin                              // Master Interrupt Block (mode: 00, 01)
@@ -144,7 +148,7 @@ module RDT (                      // Root Device Tree
                     default: UF = 1'b1;                   // Unknown Device
                 endcase
             end
-            default: UF = 1'b1;                                // Unknown Root Block
+            default: UF = 1'b1;                           // Unknown Root Block
         endcase
     end
 endmodule
@@ -175,6 +179,15 @@ module CU (
     logic [15:0] pc_go_addr;
     logic [15:0] pc_count;
 
+    logic [7:0]  rdt_rp;
+    logic [7:0]  rdt_device;
+    logic [63:0] rdt_handler_addr;
+    logic [63:0] rdt_GPIO_handler;
+    logic [63:0] rdt_TIMER_handler;
+    logic [63:0] rdt_AUDIO_handler;
+    logic [63:0] rdt_UART_handler;
+    logic        rdt_UF;
+
     RF rf (
         .clk(rf_clk),.rst(rf_rst),.we(rf_we),
         .wr_addr(rf_wr_addr),
@@ -202,6 +215,16 @@ module CU (
         .clk(pc_clk),.next(pc_next),.go(pc_go),.rst(pc_rst),
         .go_addr(pc_go_addr),
         .count(pc_count)
+    );
+    RDT rdt (
+        .rp(rdt_rp),
+        .device(rdt_device),
+        .handler_addr(rdt_handler_addr),
+        .GPIO_handler(rdt_GPIO_handler),
+        .TIMER_handler(rdt_TIMER_handler),
+        .AUDIO_handler(rdt_AUDIO_handler),
+        .UART_handler(rdt_UART_handler),
+        .UF(rdt_UF)
     );
 
     // clk
