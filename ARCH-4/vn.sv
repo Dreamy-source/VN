@@ -93,8 +93,8 @@ module PC (
     end
 endmodule
 
-module RDT (                         // Root Device Tree
-    input  logic [7:0] RP,           // Root Pointer
+module CU (
+    input  logic clk,rst,we
 );
 
 endmodule
