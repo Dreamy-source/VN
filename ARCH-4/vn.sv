@@ -159,6 +159,7 @@ endmodule
 module TIMER (
     input  logic        interrupt,
     input  logic        clk,rst,we,
+    input  logic        IA_reset,
     input  logic [63:0] ms,
     input  logic [63:0] hz,
     output logic [63:0] sum,
@@ -178,6 +179,8 @@ module TIMER (
             ms_align <= 64'd1000;
             EX  <= 1'b0;
             IA  <= 1'b0;
+        end else if (IA_reset) begin
+            IA <= 1'b0;
         end else if (we) begin
             if (interrupt) begin
                 if (ms == 64'b0) begin
@@ -294,6 +297,7 @@ module CU (
     logic [63:0] timer_ticks;
     logic        timer_EX;
     logic        timer_IA;
+    logic        timer_IA_reset;
 
     logic [7:0]  rdt_block;
     logic [7:0]  rdt_device;
@@ -355,6 +359,7 @@ module CU (
         .clk(clk),
         .rst(rst),
         .we(timer_we),
+        .IA_reset(timer_IA_reset),
         .ms(timer_ms),
         .hz(timer_hz),
         .sum(timer_sum),
@@ -391,7 +396,6 @@ module CU (
 
     // we
     assign rf_we   = we;
-    assign msr_we  = we;
 
     // multi
     // получатель = отправитель
@@ -408,8 +412,8 @@ module CU (
     assign rom_addr        = pc_count;
 
     assign rdt_handler_addr = rp_data_out[63:16];
-    assign rdt_block        = rp_data_out[15:8];
-    assign rdt_device       = rp_data_out[7:0];
+    assign rdt_device       = rp_data_out[15:8];
+    assign rdt_block        = rp_data_out[7:0];
 
     assign timer_interrupt  = msr_timer0[0];
     assign timer_we         = msr_timer0[0];
@@ -436,11 +440,15 @@ module CU (
         mode_next = mode;
         EX = 1'b0;
 
+        timer_IA_reset = 1'b0;
+
         if (timer_IA) begin
             pc_go = 1'b1;
             pc_go_addr = rdt_TIMER_handler[15:0];
             pc_save    = 1'b1;
+            timer_IA_reset   = 1'b1;
         end else begin
+            timer_IA_reset   = 1'b0;
             case (dcd_opcode)
                 9'h00D: begin   // GOLABL  ( golabl <label/num> )
                     pc_go = 1'b1;
@@ -553,8 +561,8 @@ module CU_Testbench;
         #10 rst = 0;
         we = 1;
 
-        $monitor("pc=%0d | timer_IA=%0d | ticks=%0d", 
-             cu.pc.count, cu.timer_IA, cu.timer_ticks);
+        $monitor("pc=%0d | timer_IA=%0d | ticks=%0d | opcode=%h | msr_we=%0d", 
+             cu.pc.count, cu.timer_IA, cu.timer_ticks, cu.dcd_opcode, cu.msr_we);
     
         #10000;
 
@@ -565,17 +573,32 @@ module CU_Testbench;
         end
         #10;
     
+        $display("");
+        $display("===== RF =====");
         $display("RF[0] = %h", cu.rf.rx[0]);
         $display("RF[1] = %h", cu.rf.rx[1]);
         $display("RF[2] = %h", cu.rf.rx[2]);
         $display("RF[3] = %h", cu.rf.rx[3]);
 
+        $display("");
+        $display("===== RDT =====");
+        $display("opcode = %h", cu.dcd_opcode);
         $display("RP data_out   = %h", cu.rp_data_out);
         $display("RDT block     = %h", cu.rdt_block);
         $display("RDT device    = %h", cu.rdt_device);
         $display("RDT handler   = %h", cu.rdt_handler_addr);
         $display("TIMER handler = %h", cu.rdt_TIMER_handler);
 
+        $display("");
+        $display("===== MSR =====");
+        $display("opcode = %h", cu.dcd_opcode);
+        $display("MSR data    = %h", cu.msr_data);
+        $display("MSR timer0  = %h", cu.msr_timer0);
+        $display("MSR timer1  = %h", cu.msr_timer1);
+        $display("MSR timer2  = %h", cu.msr_timer2);
+        $display("MSR wr_addr = %h", cu.msr_wr_addr);
+
+        $display("");
         $finish;
     end
 endmodule
