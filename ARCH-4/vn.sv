@@ -24,6 +24,28 @@ module RF (
     assign data_out1 = rx[rd_addr1];
 endmodule
 
+module MSR (            // Machine State Register (64x256) (0x1FD) (mode: 00, 01)
+    input  logic        clk,rst,we,
+    input  logic [7:0]  wr_addr,
+    input  logic [63:0] data,
+    output logic [63:0] timer0,timer1,timer2
+);
+    logic [63:0] msr [0:255]; 
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            for (int i = 0; i < 256; i++) begin
+                msr[i] <= 64'b0;
+            end
+        end else if (we) begin
+            msr[wr_addr] <= data;
+        end
+    end
+    assign timer0 = msr[0];
+    assign timer1 = msr[1];
+    assign timer2 = msr[2];
+endmodule
+
 module RP (            // Root Pointer
     input  logic        clk,rst,we,
     input  logic [63:0] data,
@@ -237,6 +259,11 @@ module CU (
     logic [63:0] rf_data;
     logic [63:0] rf_data_out0,rf_data_out1;
 
+    logic        msr_clk,msr_rst,msr_we;
+    logic [7:0]  msr_wr_addr;
+    logic [63:0] msr_data;
+    logic [63:0] msr_timer0,msr_timer1,msr_timer2;
+
     logic        rp_clk,rp_rst,rp_we;
     logic [63:0] rp_data;
     logic [63:0] rp_data_out;
@@ -283,6 +310,16 @@ module CU (
         .rd_addr0(rf_rd_addr0),.rd_addr1(rf_rd_addr1),
         .data(rf_data),
         .data_out0(rf_data_out0),.data_out1(rf_data_out1)
+    );
+    MSR msr (
+        .clk(msr_clk),
+        .rst(msr_rst),
+        .we(msr_we),
+        .wr_addr(msr_wr_addr),
+        .data(msr_data),
+        .timer0(msr_timer0),
+        .timer1(msr_timer1),
+        .timer2(msr_timer2)
     );
     RP rp (
         .clk(rp_clk),
@@ -342,14 +379,19 @@ module CU (
 
     assign rp_clk = clk;
 
+    assign msr_clk = clk;
+
     // rst
     assign pc_rst = rst;
     assign rf_rst = rst;
 
     assign rp_rst = rst;
 
+    assign msr_rst = rst;
+
     // we
     assign rf_we   = we;
+    assign msr_we  = we;
 
     // multi
     // получатель = отправитель
@@ -366,8 +408,13 @@ module CU (
     assign rom_addr        = pc_count;
 
     assign rdt_handler_addr = rp_data_out[63:16];
-    assign rdt_device       = rp_data_out[15:8];
-    assign rdt_block        = rp_data_out[7:0];
+    assign rdt_block        = rp_data_out[15:8];
+    assign rdt_device       = rp_data_out[7:0];
+
+    assign timer_interrupt  = msr_timer0[0];
+    assign timer_we         = msr_timer0[0];
+    assign timer_ms         = msr_timer1;
+    assign timer_hz         = msr_timer2;
 
     logic [1:0] mode_next;
     logic [1:0] mode;      // 2'h0 = machine, 2'h1 = kernel
@@ -376,77 +423,99 @@ module CU (
 
     always_comb begin
         pc_go = 1'b0;
-        pc_next = 1'b0;
+        pc_next = 1'b0;     
         pc_save = 1'b0;
-        mode_next = 2'h0;
+
+        rp_we = 1'b0;
+        rp_data = 64'h0;
+
+        msr_we = 1'b0;
+        msr_wr_addr = 8'h0;
+        msr_data = 64'h0;
+
+        mode_next = mode;
         EX = 1'b0;
 
-        case (dcd_opcode)
-            9'h00D: begin   // GOLABL
-                pc_go = 1'b1;
-                pc_go_addr = dcd_imm[15:0];
-                pc_next = 1'b0;
-                mode_next = mode;
-            end
-            9'h00E: begin   // STOP
-                pc_next = 1'b0;
-                pc_go = 1'b0;
-                mode_next = mode;
-            end
-            9'h00F: begin   // CALLSV
-                pc_save = 1'b1;
-                pc_go = 1'b1;
-                pc_go_addr = dcd_imm[15:0];
-                pc_next = 1'b0;
-                mode_next = mode;
-            end
-            9'h010: begin   // RETB
-                pc_go = 1'b1;
-                pc_go_addr = pc_saved_count;
-                pc_next = 1'b0;
-                mode_next = mode;
-            end
-            9'h011: begin   // RP
-                rp_we = 1'b1;
-                rp_data = {
-                    dcd_imm[39:16],   // handler (24-bits)
-                    dcd_imm[15:8],    // device  (8-bits)
-                    dcd_imm[7:0]      // block   (8-bits)
-                };
-                pc_next = 1'b1;
-                pc_go = 1'b0;
-                mode_next = mode;
-            end
-            9'h1FF: begin   // MMLOAD
-                if (mode == 2'h0) begin
+        if (timer_IA) begin
+            pc_go = 1'b1;
+            pc_go_addr = rdt_TIMER_handler[15:0];
+            pc_save    = 1'b1;
+        end else begin
+            case (dcd_opcode)
+                9'h00D: begin   // GOLABL  ( golabl <label/num> )
                     pc_go = 1'b1;
                     pc_go_addr = dcd_imm[15:0];
                     pc_next = 1'b0;
-                    mode_next = 2'h0;
-                end else begin
+                    mode_next = mode;
+                end
+                9'h00E: begin   // STOP    ( stop )
                     pc_next = 1'b0;
                     pc_go = 1'b0;
-                    EX = 1'b1;
+                    mode_next = mode;
                 end
-            end
-            9'h1FE: begin   // MMENTER
-                if (mode == 2'h1 || mode == 2'h0) begin
-                    pc_go = 1'b0;
+                9'h00F: begin   // CALLSV  ( callsv <label/num> )
+                    pc_save = 1'b1;
+                    pc_go = 1'b1;
+                    pc_go_addr = dcd_imm[15:0];
+                    pc_next = 1'b0;
+                    mode_next = mode;
+                end
+                9'h010: begin   // RETB  ( retb )
+                    pc_go = 1'b1;
+                    pc_go_addr = pc_saved_count;
+                    pc_next = 1'b0;
+                    mode_next = mode;
+                end
+                9'h011: begin   // RP  ( rp <block> <device> <handler> )
+                    rp_we = 1'b1;
+                    rp_data = {
+                        dcd_imm[39:16],   // handler (24-bits)
+                        dcd_imm[15:8],    // device  (8-bits)
+                        dcd_imm[7:0]      // block   (8-bits)
+                    };
                     pc_next = 1'b1;
-                    mode_next = 2'h1;
-                end else begin
-                    pc_next = 1'b0;
                     pc_go = 1'b0;
-                    EX = 1'b1;
+                    mode_next = mode;
                 end
-            end
-            default: begin
-                pc_next = 1'b1;
-                pc_go = 1'b0;
-                mode_next = mode;
-                EX = 1'b0;
-            end
-        endcase
+                9'h1FF: begin   // MMLOAD  ( mmload <addr> )
+                    if (mode == 2'h0) begin
+                        pc_go = 1'b1;
+                        pc_go_addr = dcd_imm[15:0];
+                        pc_next = 1'b0;
+                        mode_next = 2'h0;
+                    end else begin
+                        pc_next = 1'b0;
+                        pc_go = 1'b0;
+                        EX = 1'b1;
+                    end
+                end
+                9'h1FE: begin   // MMENTER  ( mmenter )
+                    if (mode == 2'h1 || mode == 2'h0) begin
+                        pc_go = 1'b0;
+                        pc_next = 1'b1;
+                        mode_next = 2'h1;
+                    end else begin
+                        pc_next = 1'b0;
+                        pc_go = 1'b0;
+                        EX = 1'b1;
+                    end
+                end
+                9'h1FD: begin   // MSR  ( msr <addr> <val> )
+                    msr_we = 1'b1;
+                    msr_wr_addr = dcd_reg_dst[7:0];
+                    msr_data = dcd_imm;
+                    pc_next = 1'b1;
+                    pc_go   = 1'b0;
+                    mode_next = mode;
+                end
+                default: begin
+                    pc_next = 1'b1;
+                    pc_go = 1'b0;
+                    mode_next = mode;
+                    EX = 1'b0;
+                end
+            endcase
+        end
     end
 
     always_ff @(posedge clk) begin
@@ -484,6 +553,11 @@ module CU_Testbench;
         #10 rst = 0;
         we = 1;
 
+        $monitor("pc=%0d | timer_IA=%0d | ticks=%0d", 
+             cu.pc.count, cu.timer_IA, cu.timer_ticks);
+    
+        #10000;
+
         repeat(10) begin
             @(posedge clk);
             $display("pc=%0d | instruction=%h | opcode=%h",
@@ -495,6 +569,12 @@ module CU_Testbench;
         $display("RF[1] = %h", cu.rf.rx[1]);
         $display("RF[2] = %h", cu.rf.rx[2]);
         $display("RF[3] = %h", cu.rf.rx[3]);
+
+        $display("RP data_out   = %h", cu.rp_data_out);
+        $display("RDT block     = %h", cu.rdt_block);
+        $display("RDT device    = %h", cu.rdt_device);
+        $display("RDT handler   = %h", cu.rdt_handler_addr);
+        $display("TIMER handler = %h", cu.rdt_TIMER_handler);
 
         $finish;
     end
