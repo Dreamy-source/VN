@@ -1,11 +1,7 @@
 mmenter
 
-start:
-    callsv math
-    add rx3 = rx1 | rx2
-    stop
+timer_handler:
+    load rx1, 1
 
-math:
-    load rx1 = 5
-    load rx2 = 3
-    retb
+start:
+    rp 2, 1, timer_handler

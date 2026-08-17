@@ -24,21 +24,21 @@ module RF (
     assign data_out1 = rx[rd_addr1];
 endmodule
 
-module CRF (            // Control-Register File
+module RP (            // Root Pointer
     input  logic        clk,rst,we,
     input  logic [63:0] data,
     output logic [63:0] data_out
 );
-    logic [63:0] cr;
+    logic [63:0] rp;
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            cr <= 64'h0000;
+            rp <= 64'h0000;
         end else if (we) begin
-            cr <= data;
+            rp <= data;
         end
     end
-    assign data_out = cr;
+    assign data_out = rp;
 endmodule
 
 module ALU (
@@ -134,8 +134,59 @@ module PC (
     end
 endmodule
 
-module RDT (                      // Root Device Tree
-    input  logic [7:0]  rp,       // Root Pointer
+module TIMER (
+    input  logic        interrupt,
+    input  logic        clk,rst,we,
+    input  logic [63:0] ms,
+    input  logic [63:0] hz,
+    output logic [63:0] sum,
+    output logic [63:0] ticks,
+
+    output logic        EX,          // exception
+    output logic        IA           // interrupt_active_flag
+);
+    logic [63:0] counter;
+    logic [63:0] ms_align;
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            counter <= 64'b0;
+            ticks <= 64'h0000;
+            sum <= 64'h0000;
+            ms_align <= 64'd1000;
+            EX  <= 1'b0;
+            IA  <= 1'b0;
+        end else if (we) begin
+            if (interrupt) begin
+                if (ms == 64'b0) begin
+                    ms_align <= 64'd1000;
+                end else begin
+                    ms_align <= ms;
+                end
+
+                sum <= ms_align / hz;
+
+                if (counter >= sum) begin
+                    counter <= 64'h0;
+                    ticks <= ticks + 1;
+                    IA <= 1'b1;
+                end else begin
+                    counter <= counter + 1;
+                    IA <= 1'b0;
+                end
+            end else begin
+                sum <= 64'b0;
+                ticks <= 64'b0;
+                counter <= 64'b0;
+                EX    <= 1'b1;
+                IA    <= 1'b0;
+            end
+        end
+    end
+endmodule
+
+module RDT (                           // Root Device Tree
+    input  logic [7:0]  block,         // Root Block
     input  logic [7:0]  device,
     input  logic [63:0] handler_addr,  // PC Address
 
@@ -157,7 +208,7 @@ module RDT (                      // Root Device Tree
 
         UF = 1'b0;
 
-        case (rp)
+        case (block)
             8'h01: begin                              // Master Base Block  (mode: 00, 01)
                 case (device)
                     8'h01: GPIO_handler = handler_addr;   // MBB.0x01 - GPIO
@@ -186,8 +237,9 @@ module CU (
     logic [63:0] rf_data;
     logic [63:0] rf_data_out0,rf_data_out1;
 
-    logic [63:0] crf_data;
-    logic [63:0] crf_data_out;
+    logic        rp_clk,rp_rst,rp_we;
+    logic [63:0] rp_data;
+    logic [63:0] rp_data_out;
 
     logic [8:0]  alu_operation;
     logic [63:0] alu_num0,alu_num1;
@@ -207,7 +259,16 @@ module CU (
     logic [15:0] pc_count;
     logic [15:0] pc_saved_count;
 
-    logic [7:0]  rdt_rp;
+    logic        timer_interrupt;
+    logic        timer_we;
+    logic [63:0] timer_ms;
+    logic [63:0] timer_hz;
+    logic [63:0] timer_sum;
+    logic [63:0] timer_ticks;
+    logic        timer_EX;
+    logic        timer_IA;
+
+    logic [7:0]  rdt_block;
     logic [7:0]  rdt_device;
     logic [63:0] rdt_handler_addr;
     logic [63:0] rdt_GPIO_handler;
@@ -222,6 +283,13 @@ module CU (
         .rd_addr0(rf_rd_addr0),.rd_addr1(rf_rd_addr1),
         .data(rf_data),
         .data_out0(rf_data_out0),.data_out1(rf_data_out1)
+    );
+    RP rp (
+        .clk(rp_clk),
+        .rst(rp_rst),
+        .we(rp_we),
+        .data(rp_data),
+        .data_out(rp_data_out)
     );
     ALU alu (
         .operation(alu_operation),
@@ -245,8 +313,20 @@ module CU (
         .count(pc_count),
         .saved_count(pc_saved_count)
     );
+    TIMER timer (
+        .interrupt(timer_interrupt),
+        .clk(clk),
+        .rst(rst),
+        .we(timer_we),
+        .ms(timer_ms),
+        .hz(timer_hz),
+        .sum(timer_sum),
+        .ticks(timer_ticks),
+        .EX(timer_EX),
+        .IA(timer_IA)
+    );
     RDT rdt (
-        .rp(rdt_rp),
+        .block(rdt_block),
         .device(rdt_device),
         .handler_addr(rdt_handler_addr),
         .GPIO_handler(rdt_GPIO_handler),
@@ -255,21 +335,18 @@ module CU (
         .UART_handler(rdt_UART_handler),
         .UF(rdt_UF)
     );
-    CRF crf (
-        .clk(clk),
-        .rst(rst),
-        .we(we),
-        .data(crf_data),
-        .data_out(crf_data_out)
-    );
 
     // clk
     assign pc_clk = clk;
     assign rf_clk = clk;
 
+    assign rp_clk = clk;
+
     // rst
     assign pc_rst = rst;
     assign rf_rst = rst;
+
+    assign rp_rst = rst;
 
     // we
     assign rf_we   = we;
@@ -288,9 +365,9 @@ module CU (
     assign dcd_instruction = rom_instruction;
     assign rom_addr        = pc_count;
 
-    assign rdt_handler_addr = crf_data_out[63:16];
-    assign rdt_device       = crf_data_out[15:8];
-    assign rdt_rp           = crf_data_out[7:0];
+    assign rdt_handler_addr = rp_data_out[63:16];
+    assign rdt_device       = rp_data_out[15:8];
+    assign rdt_block        = rp_data_out[7:0];
 
     logic [1:0] mode_next;
     logic [1:0] mode;      // 2'h0 = machine, 2'h1 = kernel
@@ -327,6 +404,17 @@ module CU (
                 pc_go = 1'b1;
                 pc_go_addr = pc_saved_count;
                 pc_next = 1'b0;
+                mode_next = mode;
+            end
+            9'h011: begin   // RP
+                rp_we = 1'b1;
+                rp_data = {
+                    dcd_imm[39:16],   // handler (24-bits)
+                    dcd_imm[15:8],    // device  (8-bits)
+                    dcd_imm[7:0]      // block   (8-bits)
+                };
+                pc_next = 1'b1;
+                pc_go = 1'b0;
                 mode_next = mode;
             end
             9'h1FF: begin   // MMLOAD
