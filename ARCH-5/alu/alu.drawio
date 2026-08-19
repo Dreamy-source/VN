@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="xqoJ2RDXTtQt4eck0Lvm" name="Page-1">
-        <mxGraphModel dx="448" dy="421" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="236" dy="421" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -9,13 +9,13 @@
                         <mxPoint x="320" y="180" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="2" value="ADD&lt;br&gt;0x00" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
+                <mxCell id="2" value="ADD&lt;br&gt;0x0" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
                     <mxGeometry x="240" y="160" width="40" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="22" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Cascadia Code;" edge="1" parent="1" source="3" target="18">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="3" value="SUB" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
+                <mxCell id="3" value="SUB&lt;br&gt;0x1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
                     <mxGeometry x="240" y="200" width="40" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="7" style="edgeStyle=none;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Cascadia Code;" edge="1" parent="1" source="5" target="2">
@@ -36,13 +36,13 @@
                 <mxCell id="23" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Cascadia Code;" edge="1" parent="1" source="9" target="20">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="9" value="MUL" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
+                <mxCell id="9" value="MUL&lt;br&gt;0x2" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
                     <mxGeometry x="240" y="240" width="40" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="24" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Cascadia Code;" edge="1" parent="1" source="10" target="21">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="10" value="DIV" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
+                <mxCell id="10" value="DIV&lt;br&gt;0x3" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Cascadia Code;" vertex="1" parent="1">
                     <mxGeometry x="240" y="280" width="40" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="13" value="ALU.SelectOperation" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Cascadia Code;" vertex="1" parent="1">
