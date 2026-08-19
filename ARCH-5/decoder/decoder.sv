@@ -1,3 +1,12 @@
+// []
+// | VN
+// | Contributed by:
+// |  | Dreamy-source (owner)
+// |  | Discord: ilikethenature
+// |  []
+// | Last edited: 19.08.2026
+// []
+
 module decoder #(
     parameter InstructionSize = 64,
     parameter OperationSize = 9,
