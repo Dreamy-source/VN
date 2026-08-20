@@ -1,3 +1,12 @@
+// []
+// | VN
+// | Contributed by:
+// |  | Dreamy-source (owner)
+// |  | Discord: ilikethenature
+// |  []
+// | Last edited: 20.08.2026
+// []
+
 module pc #(
     parameter AddressBits = 12,        // because in ROM 4096 entries
     parameter AddressAfterReturn = 1   // how many instructions skip after return from call

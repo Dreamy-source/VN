@@ -1,5 +1,14 @@
+// []
+// | VN
+// | Contributed by:
+// |  | Dreamy-source (owner)
+// |  | Discord: ilikethenature
+// |  []
+// | Last edited: 20.08.2026
+// []
+
 module rom #(
-    parameter FirmwarePath = "~/VN/ARCH-5/Firmware/vnfirmware.hex",
+    parameter FirmwarePath = "~/VN/ARCH-5/Firmware/vnfirmware.hex",  // change this path to your firmware
     parameter InstructionBits = 64,
     parameter Entries = 4096         // base = 32kb (4096 entries)
 ) (
