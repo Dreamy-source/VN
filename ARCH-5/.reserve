@@ -1,0 +1,10 @@
+Spec/
+#RAIA **(RAIA)**
+1. #SSC **(System Stack Calls)**
+2. #GPU **(General Protection Unit)**
+
+* RAIA Trace Protocol:
+1. Стек вызовов проходит в вектор System Stack Calls (см. выше: #SSC).
+2. Из вектора System Stack Calls инструкции по конвейеру идут в General Protection Unit (см. выше: #GPU).
+3. General Protection Unit проверяет, откуда пришел вызов (System/Kernel/User). После проверки вызова, General Protection Unit делает вердикт прошедшей инструкции (EXECUTE/BLOCKED) (см. выше: #SystemPointer).
+4. Вердикт General Protection Unit передает данные прошедшей инструкции в Decoder (см. выше: #Decoder) на исполнение. Если флаг **SRF** (System RAIA Flag) равен 0, Decoder не будет исполнять инструкцию, если у нее нету флага **SRF** (System RAIA Flag) (см. выше: #SystemPointer) или не имеется вовсе.
