@@ -1,19 +1,15 @@
-module RF (
-    input  logic        Clock, Reset, WriteEnable,
-    input  logic [4:0]  WriteAddress,
-    input  logic [63:0] Data,
-    output logic [63:0] ReadData,
-    output logic [63:0] ReadenData
+module ALU (
+    input  logic [4:0]  Operation,
+    input  logic [63:0] A, B,
+    output logic [63:0] Result
 );
-    logic [63:0] x [0:31];  // x0-x31
-
-    always_ff @(posedge Clock) begin
-        if (Reset) begin
-            for (int i = 0; i < 32; i++)
-                x[i] <= 0;            
-        end else if (WriteEnable) begin
-            x[WriteAddress] <= Data;
-        end
+    always_comb begin
+        case (Operation)
+            5'h00: Result = A + B;
+            5'h01: Result = A - B;
+            5'h02: Result = A * B;
+            5'h03: Result = A / B;
+            default: Result = 0;
+        endcase
     end
-    assign ReadenData = x[ReadData];
 endmodule
