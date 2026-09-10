@@ -1,19 +1,19 @@
 // Cache/
-`include "../Cache/l1.sv"
-`include "../Cache/l2.sv"
-`include "../Cache/l3.sv"
-`include "../Cache/l4.sv"
+`include "../cache/l1.sv"
+`include "../cache/l2.sv"
+`include "../cache/l3.sv"
 
 // Core/
 `include "alu.sv"
+`include "fpu.sv"
 `include "pc.sv"
 `include "rf.sv"
 `include "decoder.sv"
 
 // Memory/
-`include "../Memory/mmio.sv"
-`include "../Memory/mmu.sv"
-`include "../Memory/rom.sv"
+`include "../memory/mmio.sv"
+`include "../memory/mmu.sv"
+`include "../memory/rom.sv"
 
 module ControlUnit;
     logic Clock, Reset, WriteEnable;
@@ -41,12 +41,15 @@ module ControlUnit;
         .Result(ALU_Result)
     );
     RF rf (
+        .Clock(Clock),
+        .Reset(Reset),
+        .WriteEnable(WriteEnable),
         .WriteAddress(RF_WriteAddress),
         .ReadData(RF_ReadData),
         .Data(RF_Data),
         .ReadenData(RF_ReadenData)
     );
-    DCD decoder (
+    Decoder decoder (
         .Instruction(DCD_Instruction),
         .Operation(DCD_Operation),
         .Destination(DCD_Destination),
