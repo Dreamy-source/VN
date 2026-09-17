@@ -6,15 +6,27 @@ OPS_NASM = {
     "add": 0x000, "sub": 0x001, "mul": 0x002, "div": 0x003,
     "and": 0x004, "or":  0x005, "xor": 0x006, "not": 0x007,
     "shl": 0x008, "shr": 0x009, "mov": 0x00A, "nop": 0x00B,
-    "hlt": 0x00C,
+    "hlt": 0x00C, "snd": 0x00D
 }
 
 OPS_VN = {
     "add": 0x000, "sub": 0x001, "mul": 0x002, "div": 0x003,
     "and": 0x004, "or":  0x005, "xor": 0x006, "not": 0x007,
     "lsh": 0x008, "rsh": 0x009, "mv":  0x00A, "noth": 0x00B,
-    "prcstop": 0x00C,
+    "prcstop": 0x00C, "snd": 0x00D
 }
+
+def parse_imm(s):
+    s = s.strip()
+
+    if len(s) >= 3 and s[0] == "'" and s[-1] == "'":
+        return ord(s[1])
+
+    if len(s) >= 4 and s[0] == "'" and s[1] == "\\" and s[-1] == "'":
+        escapes = {'n': 10, 't': 9, 'r': 13, '0': 0, '\\': 92, "'": 39}
+        return escapes.get(s[2], 0)
+
+    return int(s, 0)
 
 def assemble_nasm(content):
     output = []
@@ -39,7 +51,7 @@ def assemble_nasm(content):
             match operation:
                 case "mov":
                     dst = int(tokens[1][1:])
-                    imm = int(tokens[2], 0)
+                    imm = parse_imm(tokens[2])
                     instruction = (op << 53) | (dst << 38) | (imm & ((1 << 38) - 1))
 
                 case "not":
@@ -49,6 +61,10 @@ def assemble_nasm(content):
 
                 case "nop" | "hlt":
                     instruction = (op << 53)
+
+                case "snd":
+                    imm = parse_imm(tokens[1])
+                    instruction = (op << 53) | (imm & ((1 << 38) - 1))
 
                 case _:
                     src0 = int(tokens[1][1:])
@@ -89,7 +105,7 @@ def assemble_vn(content):
             match operation:
                 case "mv":
                     dst = int(tokens[1][1:])
-                    imm = int(tokens[2], 0)
+                    imm = parse_imm(tokens[2])
                     instruction = (op << 53) | (dst << 38) | (imm & ((1 << 38) - 1))
 
                 case "not":
@@ -99,6 +115,10 @@ def assemble_vn(content):
 
                 case "noth" | "prcstop":
                     instruction = (op << 53)
+
+                case "snd":
+                    imm = parse_imm(tokens[1])
+                    instruction = (op << 53) | (imm & ((1 << 38) - 1))
 
                 case _:
                     src0 = int(tokens[1][1:])

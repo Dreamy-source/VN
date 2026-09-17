@@ -1,17 +1,21 @@
-// Core/
-`include "alu.sv"
-`include "regfile.sv"
-`include "decoder.sv"
-`include "pc.sv"
+// Components/Core/
+`include "../Components/alu.sv"
+`include "../Components/decoder.sv"
+`include "../Components/pc.sv"
 
-// Memory/
-`include "../Memory/rom.sv"
+// Components/Memory/
+`include "../Components/Memory/regfile.sv"
+`include "../Components/Memory/rom.sv"
+
+// Components/Devices/
+`include "../Components/Devices/uart.sv"
 
 module top
 (
     input logic clock, reset 
 );
     logic writeEnable;
+    logic UART_writeEnable;
 
     // ALU (Arithmetic Logic Unit)
     logic [10:0] ALU_Operation;
@@ -41,6 +45,10 @@ module top
     // ROM (Read-Only Memory)
     logic [63:0] ROM_Instruction;
 
+    // UART
+    logic [63:0] UART_WriteAddress;
+    logic [63:0] UART_WriteData;
+    logic [63:0] UART_ReadedData;
 
     // Connections
     // ALU
@@ -93,14 +101,26 @@ module top
         .Instruction(ROM_Instruction)
     );
 
+    // UART
+    UART uart
+    (
+        .clock(clock),
+        .reset(reset),
+        .writeEnable(UART_writeEnable),
+        .WriteAddress(UART_WriteAddress),
+        .WriteData(UART_WriteData),
+        .ReadedData(UART_ReadedData)
+    );
+
     // кто получает --> кто отдает
-    // Classic
     logic is_mov_inst;
     logic is_nop_inst;
     logic is_hlt_inst;
+    logic is_snd_inst;
     assign is_mov_inst = (Decoder_Operation == 11'h00A);
     assign is_nop_inst = (Decoder_Operation == 11'h00B);
     assign is_hlt_inst = (Decoder_Operation == 11'h00C);
+    assign is_snd_inst = (Decoder_Operation == 11'h00D);
 
     assign ALU_Operation = Decoder_Operation;
     assign ALU_A = RegFile_ReadedRegister0;
@@ -111,6 +131,10 @@ module top
     assign Decoder_Instruction = ROM_Instruction;
     assign RegFile_ReadRegister0 = Decoder_Source0;
     assign RegFile_ReadRegister1 = Decoder_Source1;
+
+    assign UART_writeEnable = is_snd_inst;
+    assign UART_WriteAddress = 0;
+    assign UART_WriteData = {56'b0, Decoder_Immediate[7:0]};
 
     assign writeEnable = ~(is_nop_inst | is_hlt_inst);
     assign PC_next = ~is_hlt_inst;
@@ -134,11 +158,13 @@ module Testbench;
         reset = 1;
         #10 reset = 0;
 
-        for (int i = 0; i < 10; i++) begin
+        $display("\n");
+        for (int i = 0; i < 17; i++) begin
             @(posedge clock);
 
-            $display("op=0x%0h | x0=%0d x1=%0d x2=%0d", dut.ALU_Operation, dut.regfile.x[0], dut.regfile.x[1], dut.regfile.x[2]);
+            //$display("op=0x%0h | x0=%0d x1=%0d x2=%0d", dut.ALU_Operation, dut.regfile.x[0], dut.regfile.x[1], dut.regfile.x[2]);
         end
+        $display("\n\n");
         $finish;
     end
 endmodule
