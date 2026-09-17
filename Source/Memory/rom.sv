@@ -11,7 +11,7 @@ module ROM
         for (int i = 0; i < ROM_SIZE; i++)
             ROM[i] = 0;
 
-        $readmemh("../Source/Misc/Firmwares/Build/vnfirmwaremgr.frm", ROM);
+        $readmemh("Source/Misc/Firmwares/Build/vnfirmwaremgr.frm", ROM);
     end
     assign Instruction = ROM[AddressIndex];
 endmodule
