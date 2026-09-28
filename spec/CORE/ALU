@@ -1,0 +1,132 @@
+### ALU (Arithmetic Logic Unit)
+|
+| Opcode: 8-bit
+| Format: R-type (all operations, except NOT)
+| Format (NOT): R-type (unary)
+|
+
+## 1. Unsigned operations
+
+--------------------------------------
+
+# ADD
+    ===| Unsigned |===
+    Opcode: 0x00
+    Syntax: ADD x2, x0, x1
+    Operation:
+        x2 = x0 + x1
+
+--------------------------------------
+
+# SUB
+    ===| Unsigned |===
+    Opcode: 0x01
+    Syntax: SUB x2, x0, x1
+    Operation:
+        x2 = x0 - x1
+
+--------------------------------------
+
+# MUL
+    ===| Unsigned |===
+    Opcode: 0x02
+    Syntax: MUL x2, x0, x1
+    Operation:
+        x2 = x0 * x1
+
+--------------------------------------
+
+# DIV
+    ===| Unsigned |===
+    Opcode: 0x03
+    Syntax: DIV x2, x0, x1
+    Operation:
+        if (x1 == 0) then
+            x2 = 0
+        else
+            x2 = x0 / x1
+        end
+
+--------------------------------------
+
+# AND
+    ===| Unsigned |===
+    Opcode: 0x04
+    Syntax: AND x2, x0, x1
+    Operation:
+        x2 = x0 & x1
+
+--------------------------------------
+
+# XOR
+    ===| Unsigned |===
+    Opcode: 0x05
+    Syntax: XOR x2, x0, x1
+    Operation:
+        x2 = x0 ^ x1
+
+--------------------------------------
+
+# NOT
+    ===| Unsigned |===
+    Opcode: 0x06
+    Syntax: NOT x1, x0
+    Operation:
+        x1 = ~x0
+
+--------------------------------------
+
+# OR
+    ===| Unsigned |===
+    Opcode: 0x07
+    Syntax: OR x2, x0, x1
+    Operation:
+        x2 = x0 | x1
+
+--------------------------------------
+
+# SHR
+    ===| Unsigned |===
+    Opcode: 0x08
+    Syntax: SHR x2, x0, x1
+    Operation:
+        x2 = x0 >> x1
+
+--------------------------------------
+
+# SHL
+    ===| Unsigned |===
+    Opcode: 0x09
+    Syntax: SHL x2, x0, x1
+    Operation:
+        x2 = x0 << x1
+
+--------------------------------------
+
+
+
+## 2. Signed operations
+
+--------------------------------------
+
+# IMUL
+    ===| Signed |===
+    Opcode: 0x0A
+    Syntax: IMUL x2, x0, x1
+    Operation:
+        x2 = x0 * x1
+
+--------------------------------------
+
+# IDIV
+    ===| Signed |===
+    Opcode: 0x0B
+    Syntax: IDIV x2, x0, x1
+    Operation:
+        if (x1 == 0) then
+            x2 = 0
+        else
+            x2 = x0 / x1
+        end
+
+--------------------------------------

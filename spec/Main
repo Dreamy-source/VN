@@ -1,0 +1,51 @@
+Vanilla ISA Specification
+SPDX-License-Identifier: CERN-OHL-S-2.0
+
+Copyright (c) 2026 VN
+ 
+This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
+You may redistribute and modify this source and make products using it
+under the terms of the CERN-OHL-S v2.
+
+Welcome to Vanilla!
+
+-------------------------------------------------
+#### HUB
+
+### 1. Introduction
+
+VN (Vanilla) - it is a RISC-like ISA designed from the ground up.
+Target: clear architecture with no legacy.
+
+
+### 2. Main features
+|
+| bits              : 64
+| registers         : 32     (x0-x31)
+| hardwired reg     : x31    (control register, not general-purpose)
+| instruction width : 64-bit (fixed)
+| privileges        : hypervisor / kernel / user
+| interrupts        : vectors, 256
+
+
+### 2. Registers
+|
+| x0-x30        : general purpose
+| x31           : hardwired, using for control features
+| ... (about: MEMORY/Register File)
+
+### 3. Memory
+|
+| reg. file     : register file, contains all general-purpose and hardwired registers
+| MMIO          : memory-mapped I/O, base address and control flags in x31
+| L1 cache      : fast memory only for cpu
+| ... (about: MEMORY/)
+
+### 4. Interrupts
+|
+| vector table  : used to describe handler addresses
+| handlers      : handlers of cpu/peripheral devices
+| ... (about: CORE/Interrupts)
+
+
+#### Main
