@@ -1,3 +1,16 @@
+// Copyright (c) 2026 Dreamy-source
+// 
+// This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
+// 
+// You may redistribute and modify this source and make products using it under
+// the terms of the CERN-OHL-S v2 (https://ohwr.org/cern_ohl_s_v2.txt).
+// 
+// This source is distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY,
+// INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A
+// PARTICULAR PURPOSE. Please see the CERN-OHL-S v2 for applicable conditions.
+// 
+// Source location: https://github.com/Dreamy-source/VN
+
 module DPU
 (
     input  logic        clk,
@@ -11,11 +24,11 @@ module DPU
     output logic [4:0]  rd1,
     output logic [8:0]  imm,
 
-    // отдаем alu (идут в top)
+    // delete: отдаем alu (идут в top)
     output logic [7:0]  alu_op,
     output logic [63:0] alu_a, alu_b,
 
-    // данные из rf (приходят из top)
+    // delete: данные из rf (приходят из top)
     input  logic [63:0] rf_rd0, rf_rd1
 );
     // ID
