@@ -8,6 +8,7 @@
 - MEM (Memory)
 - MMU (Memory Management Unit)
 - REG (Register File)
+- STACK (Stack Controller)
 ### Peripheral
 - GPIO (General-Purpose I/O)
 #### Time
@@ -16,4 +17,3 @@
 ### System
 - INT (Interrupts Controller)
 - RING (Ring Controller)
-- STACK (Stack Controller)
