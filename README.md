@@ -1,4 +1,4 @@
-# VN (Vanilla) - Human-Oriented Processor Architecture
+# VN (Vanilla) — Human-Oriented Processor Architecture
 
 ## Modules
 ### Core
