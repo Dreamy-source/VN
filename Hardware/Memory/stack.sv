@@ -36,7 +36,7 @@ module STACK
             sp <= stack_start_act;
         end
         else if (push) begin
-            if (sp >= stack_limit_act) begin
+            if (sp >= stack_limit_act || align == 0) begin
                 mf_exception <= 1;
                 sp <= stack_start_act;
             end else begin
@@ -44,7 +44,7 @@ module STACK
             end
         end
         else if (pop) begin
-            if (sp <= stack_start_act) begin
+            if (sp <= stack_start_act || align == 0) begin
                 mf_exception <= 1;
                 sp <= stack_start_act;
             end else begin
