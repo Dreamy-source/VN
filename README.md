@@ -19,7 +19,7 @@
 - INT (Interrupts Controller)
 - RING (Ring Controller)
 
-## Pipeline
+## Decode-Pipeline
 - Stage 1: **IF**  — Fetch     |  Take instruction from memory
 - Stage 2: **ID**  — Decode    |  Cut instruction to parts
 - Stage 3: **EX**  — Execute   |  Perform calculations (ALU) and compute addresses
