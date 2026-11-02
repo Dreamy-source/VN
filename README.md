@@ -25,3 +25,12 @@
 - Stage 3: **EX**  — Execute   |  Perform calculations (ALU) and compute addresses
 - Stage 4: **MEM** — Memory    |  Load from memory/Store to memory (Load/Store)
 - Stage 5: **WB**  — Writeback |  Write results back to registers/memory
+
+## Memory Management
+### Rings
+- **Supervisor (Ring 0)** — Kernel level
+- **User (Ring 1)** — Application level
+
+### Access rules
+- **Supervisor:** Read/Write to all memory.
+- **User:** Read/Write only within the user-mapped region (configured by Supervisor). Access to MMIO and Supervisor is blocked (`#MF`).
