@@ -38,8 +38,8 @@ module ALU
             7: result = a | b;
             8: result = a << b;
             9: result = a >> b;
-            'hA: result = $signed(a) <<< b;
-            'hB: result = $signed(a) >>> b;
+            'hA: result = $unsigned($signed(a) <<< b);
+            'hB: result = $unsigned($signed(a) >>> b);
             'hC: result = $unsigned($signed(a) * $signed(b));
             'hD: begin
                 if ($signed(b) != 0) begin
