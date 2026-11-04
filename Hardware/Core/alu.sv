@@ -21,10 +21,10 @@ module ALU
     always_comb begin
         case (op)
             default: result = 0;
-            8'h00: result = a + b;
-            8'h01: result = a - b;
-            8'h02: result = a * b;
-            8'h03: begin
+            0: result = a + b;
+            1: result = a - b;
+            2: result = a * b;
+            3: begin
                 if (b != 0) begin
                     result = a / b;
                 end
@@ -32,14 +32,16 @@ module ALU
                     result = 0;
                 end
             end
-            8'h04: result = a & b;
-            8'h05: result = a ^ b;
-            8'h06: result = a | b;
-            8'h07: result = ~a;
-            8'h08: result = a << b;
-            8'h09: result = a >> b;
-            8'h0A: result = $unsigned($signed(a) * $signed(b));
-            8'h0B: begin
+            4: result = a & b;
+            5: result = a ^ b;
+            6: result = ~a;
+            7: result = a | b;
+            8: result = a << b;
+            9: result = a >> b;
+            'hA: result = $signed(a) <<< b;
+            'hB: result = $signed(a) >>> b;
+            'hC: result = $unsigned($signed(a) * $signed(b));
+            'hD: begin
                 if ($signed(b) != 0) begin
                     result = $unsigned($signed(a) / $signed(b));
                 end
