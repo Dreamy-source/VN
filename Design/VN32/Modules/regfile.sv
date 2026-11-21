@@ -1,3 +1,14 @@
+/*
+// SPDX-License-Identifier: CERN-OHL-S-2.0
+// Copyright (C) 2026 VN
+//
+// This source file is licensed under the CERN Open Hardware Licence
+// Version 2 - Strongly Reciprocal (CERN-OHL-S-2.0).
+// See the LICENSE file in the root of the repository for the full text.
+//
+// Source: github.com/Dreamy-source/VN
+*/
+
 interface REGFILE_INTF;
     logic clk;
     logic r;
